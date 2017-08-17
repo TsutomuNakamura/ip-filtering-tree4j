@@ -32,6 +32,8 @@ public class IPDict4J <T>
             throw new IllegalFormatException("String of IPv4 " + ipaddr + " is invalid");
         if(data == null)
             throw new IllegalFormatException("TODO: Cannot push null as data");
+
+
     }
 
     /**
@@ -50,12 +52,25 @@ public class IPDict4J <T>
         return binIPv4;
     }
 
+    public Node createNewOneNode(T data, int subnetMaskLength, int childSubnetMaskLength, Map<Integer, Node> refToChild) {
+        Node result = new Node();
+    }
+
     class Node <T>{
         private T data;
         private int subnetMaskLength;
         private int childSubnetMaskLength;
-        Map<Integer, T> refToChildren;
+        private Map<Integer, Node> refToChildren;
+
         protected Node() {}
+
+        protected Node(T data, int subnetMaskLength, int childSubnetMaskLength, Map<Integer, Node> refToChild) {
+            this.refToChildren          = new HashMap<Integer, Node>();
+            this.data                   = data;
+            this.subnetMaskLength       = subnetMaskLength;
+            this.childSubnetMaskLength  = childSubnetMaskLength;
+            this.refToChild             = refToChild;
+        }
 
         public T getData() {
             return data;
@@ -81,16 +96,17 @@ public class IPDict4J <T>
             this.childSubnetMaskLength = childSubnetMaskLength;
         }
 
-        public Map<Integer, T> getRefToChildren() {
+        public Map<Integer, Node> getRefToChildren() {
             return refToChildren;
         }
 
-        public void setRefToChildren(Map<Integer, T> refToChildren) {
+        public void setRefToChildren(Map<Integer, Node> refToChildren) {
             this.refToChildren = refToChildren;
         }
 
-        public void addRefToChildren(int address, Node childNode) {
-
+        public void addRefToChildren(int binaryAddress, Node childNode) {
+            if(this.refToChildren == null) this.refToChildren = new HashMap<Integer, Node>;
+            this.refToChildren.put(binaryAddress, childNode);
         }
     }
 }
