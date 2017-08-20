@@ -2,6 +2,9 @@ package com.gmail._0x00.tsuna.ipdict4j;
 
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +17,21 @@ import static com.gmail._0x00.tsuna.ipdict4j.IPDict4J.Node;
  */
 public class IPDict4JTest
 {
+    public Object invokeInstanceMethod(IPDict4J instance, String methodName, Object... args)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class<IPDict4J> c = (Class<IPDict4J>)instance.getClass();
+        Method method = c.getDeclaredMethod(methodName);
+        method.setAccessible(true);
 
+        return method.invoke(instance, args);
+    }
+    public Object invokeStaticMethod(Class<IPDict4J> c, String methodName, Object... args)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = c.getDeclaredMethod(methodName);
+        method.setAccessible(true);
+
+        return method.invoke(args);
+    }
 
     @Test
     public void testconvertIPStringToBinary() {
@@ -32,7 +49,7 @@ public class IPDict4JTest
 
     @Test
     public void testHasGlueNodeOnly() {
-        IPDict4J<String> dict = new IPDict4J<String>();
+        IPDict4J<String> dict = new IPDict4J<>();
 
         // Test it should return false if only one data node is existed.
         Node<String> n = new Node<>();
@@ -97,5 +114,34 @@ public class IPDict4JTest
         assertFalse(dict.hasGlueNodeOnly(n));
     }
 
+    @Test
+    public void getBinIPv4NetAddr() {
+        IPDict4J<String> dict = new IPDict4J<>();
+        assertEquals(dict.convertIPStringToBinary("255.255.255.255"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 32));
+        assertEquals(dict.convertIPStringToBinary("255.255.255.254"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 31));
+        assertEquals(dict.convertIPStringToBinary("255.255.255.128"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 25));
+        assertEquals(dict.convertIPStringToBinary("255.255.255.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 24));
+        assertEquals(dict.convertIPStringToBinary("255.255.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 16));
+        assertEquals(dict.convertIPStringToBinary("255.0.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 8));
+        assertEquals(dict.convertIPStringToBinary("0.0.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 0));
+        assertEquals(dict.convertIPStringToBinary("192.168.1.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 24));
+        assertEquals(dict.convertIPStringToBinary("192.168.1.128"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 25));
+        assertEquals(dict.convertIPStringToBinary("192.168.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 16));
+        assertEquals(dict.convertIPStringToBinary("192.0.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 8));
+    }
 
+    @Test
+    public void createGlueNodes() throws NoSuchFieldException, IllegalAccessException {
+        IPDict4J<String> dict = new IPDict4J<>();
+        Node<String> rootNode = dict.getRootNode();
+        rootNode.setChildSubnetMaskLength(24);
+        // TODO:
+        //rootNode.getRefToChildren().put(dict.convertIPStringToBinary("192.168.1.0"));
+    }
+
+    @Test
+    public void push() {
+        // getVariableOfInstance();
+
+    }
 }

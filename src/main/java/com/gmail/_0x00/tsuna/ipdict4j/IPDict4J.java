@@ -1,7 +1,6 @@
 package com.gmail._0x00.tsuna.ipdict4j;
 
 import java.util.HashMap;
-import java.util.IllegalFormatException;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -11,31 +10,114 @@ import java.util.regex.Pattern;
  */
 public class IPDict4J <T>
 {
-    private Node root;
 
-    private final String IPV4_DELEMITOR = "\\.";
+
+    private static final String IPV4_DELEMITOR = "\\.";
 
     private static final Pattern IPV4_REGEX
             = Pattern.compile("^(([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])\\\\.){3}([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])$");
 
     public static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
 
+    private Node<T> root = new Node<>(null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new HashMap<>());
+
+    private int[] masks = new int[32 + 1];
+
     public IPDict4J() {
-        root = new Node<T>();
-        root.setData(null);
-        root.setSubnetMaskLength(-1);
-        root.setChildSubnetMaskLength(0);
-        Map<Integer, T> map = new HashMap<Integer, T>();
-        root.setRefToChildren(map);
-        root.addRefToChildren(0, null);
+        Map<Integer, Node<T>> rootMap = root.getRefToChildren();
+        rootMap.put(0, new Node<>(null, 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+
+        int mask = 0xffffffff;
+        for(int i = 32; i >= 0; --i) {
+            masks[i] = mask;
+            mask <<= 1;
+        }
     }
 
-    public void push(String ipaddr, int subnetMaskLength, T data) throws Exception {
-        if(!IPV4_REGEX.matcher(ipaddr).matches())
-            throw new Exception("String of IPv4 " + ipaddr + " is invalid");
+
+    public void push(String ipAddress, int subnetMaskLength, T data) throws Exception {
+        if(!IPV4_REGEX.matcher(ipAddress).matches())
+            throw new Exception("String of IPv4 " + ipAddress + " is invalid");
         if(data == null)
             throw new Exception("TODO: Cannot push null as data");
 
+        pushDataToIPv4Tree(
+                root,
+                root.getRefToChildren().get(0),
+                convertIPStringToBinary(ipAddress),
+                subnetMaskLength,
+                data);
+    }
+
+    public Node<T> getRootNode() {
+        return root.getRefToChildren().get(0);
+    }
+
+    private void pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws Exception {
+        Node<T> currentNode     = node;
+        Node<T> parentNode      = pNode;
+        int lastNetworkAddress  = 0;
+        int networkAddress = getBinIPv4NetAddr(ipv4, subnetMaskLength);
+
+        while(true) {
+            int subnetLengthOfCurrentNode = currentNode.getSubnetMaskLength();
+            if(subnetLengthOfCurrentNode == subnetMaskLength) {
+                // The data may have been existed
+                if(currentNode.getData() != null) {
+                    // TODO: appropriate exception
+                    throw new Exception("The data you are going to is already registerd at index ...");
+                }
+                // Override the data in this glue node
+                parentNode.getRefToChildren().put(
+                        networkAddress,
+                        new Node<T>(data, subnetMaskLength, currentNode.getChildSubnetMaskLength(), currentNode.getRefToChildren()));
+                break;
+            } else if(subnetLengthOfCurrentNode < subnetMaskLength) {
+                if(currentNode.getRefToChildren().isEmpty()) {
+                    Node<T> newNode = new Node<>(
+                            currentNode.getData(),
+                            currentNode.getSubnetMaskLength(),
+                            subnetLengthOfCurrentNode,
+                            currentNode.getRefToChildren());
+
+                    newNode.getRefToChildren().put(
+                            networkAddress,
+                            new Node<T>(data, subnetMaskLength, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+                    break;
+                }
+
+                if(currentNode.getChildSubnetMaskLength() > subnetMaskLength) {
+                    // TODO:
+                    // Create glue node then check the glue node's network address
+                    createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength);
+                    currentNode.getRefToChildren().put(
+                            networkAddress, new Node<>(data, subnetMaskLength, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+                    break;
+                } else if(currentNode.getChildSubnetMaskLength() < subnetMaskLength) {
+                    // continue then new node will be appended
+                    int childNetworkAddress = getBinIPv4NetAddr(ipv4, currentNode.getChildSubnetMaskLength());
+
+                    if(currentNode.getRefToChildren().get(childNetworkAddress) == null) {
+                        currentNode.getRefToChildren().put(
+                                childNetworkAddress,
+                                new Node<>(null, currentNode.getChildSubnetMaskLength(), SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+                    }
+                    parentNode          = currentNode;
+                    currentNode         = currentNode.getRefToChildren().get(childNetworkAddress);
+                    lastNetworkAddress  = getBinIPv4NetAddr(ipv4, currentNode.getSubnetMaskLength());
+                    continue;
+                } else {
+                    if(currentNode.getRefToChildren().get(ipv4) == null) {
+                        currentNode.getRefToChildren().put(
+                                ipv4,
+                                new Node<>(null, subnetMaskLength, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+                    }
+                    parentNode = currentNode;
+                    currentNode = currentNode.getRefToChildren().get(ipv4);
+                    continue;
+                }
+            }
+        }
     }
 
     /**
@@ -65,6 +147,38 @@ public class IPDict4J <T>
         if(m == null || m.isEmpty()) return false;
 
         return !m.entrySet().stream().anyMatch(e -> e.getValue().getData() != null);
+    }
+
+    /**
+     * Get network address from binary IPv4 address
+     * @param ipv4 the IPv4 binary address
+     * @param subnetMaskLength the length of subnetmask
+     * @return network address
+     */
+    public int getBinIPv4NetAddr(int ipv4, int subnetMaskLength) {
+        return (masks[subnetMaskLength] & ipv4);
+    }
+
+    public void createGlueNodes(Node<T> currentNode, Node<T> parentNode, int netAddrToCurrent, int subnetMaskLength) {
+        Map<Integer, Node<T>> childNodes        = currentNode.getRefToChildren();
+        Map<Integer, Node<T>> rootOfGlueNodes   = new HashMap<>();
+
+        for(Map.Entry<Integer, Node<T>> e : childNodes.entrySet()) {
+            int netAddress = getBinIPv4NetAddr(e.getKey(), subnetMaskLength);
+
+            //if(node.getNodeToRefToChildren(netAddress) == null) {
+            if(currentNode.getRefToChildren().get(netAddress) == null) {
+                rootOfGlueNodes.put(
+                        netAddress,
+                        new Node<>(null, subnetMaskLength, currentNode.getChildSubnetMaskLength(), new HashMap<>()));
+            }
+            Node<T> glueNode = rootOfGlueNodes.get(netAddress);
+            rootOfGlueNodes.get(netAddress).getRefToChildren().put( e.getKey(), childNodes.get(e.getKey()) );
+        }
+
+        Node<T> newCurrentNode
+                = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, rootOfGlueNodes);
+        parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
     }
 
     /**
@@ -134,9 +248,12 @@ public class IPDict4J <T>
             this.refToChildren = refToChildren;
         }
 
-        public void addRefToChildren(int binaryAddress, Node childNode) {
-            if(this.refToChildren == null) this.refToChildren = new HashMap<>();
-            this.refToChildren.put(binaryAddress, childNode);
-        }
+        //public void putNodeToRefToChildren(int binaryAddress, Node<T> childNode) {
+        //    this.refToChildren.put(binaryAddress, childNode);
+        //}
+
+        //public Node<T> getNodeToRefToChildren(int binaryAddress) {
+        //    return this.refToChildren.get(binaryAddress);
+        //}
     }
 }
