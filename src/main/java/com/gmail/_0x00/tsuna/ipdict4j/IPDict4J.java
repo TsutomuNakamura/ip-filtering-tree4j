@@ -181,6 +181,10 @@ public class IPDict4J <T>
         parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
     }
 
+    private String hogefuga(String hoge, String fuga) {
+        return "arg1: " + hoge + ", arg2: " + fuga;
+    }
+
     /**
      * Class Node is the node of the ipdict tree.
      * There are 2 types of the node, one is a data node that has data entity and the other is a glue node that has no data(null).
@@ -188,7 +192,7 @@ public class IPDict4J <T>
      *
      * @param <T> type of data
      */
-    static class Node <T>{
+    static class Node <T> {
         private T data;
         private int subnetMaskLength;
         private int childSubnetMaskLength;
@@ -203,17 +207,18 @@ public class IPDict4J <T>
 
         /**
          * Constructs the node with values.
-         * @param data the data indexed by IP address
-         * @param subnetMaskLength subnetmask length in current network address
+         *
+         * @param data                  the data indexed by IP address
+         * @param subnetMaskLength      subnetmask length in current network address
          * @param childSubnetMaskLength subnetmask length in network address under this node
-         * @param refToChild referenct to child node
+         * @param refToChild            referenct to child node
          */
         protected Node(T data, int subnetMaskLength, int childSubnetMaskLength, Map<Integer, Node<T>> refToChild) {
-            this.refToChildren          = new HashMap<>();
-            this.data                   = data;
-            this.subnetMaskLength       = subnetMaskLength;
-            this.childSubnetMaskLength  = childSubnetMaskLength;
-            this.refToChildren          = refToChild;
+            this.refToChildren = new HashMap<>();
+            this.data = data;
+            this.subnetMaskLength = subnetMaskLength;
+            this.childSubnetMaskLength = childSubnetMaskLength;
+            this.refToChildren = refToChild;
         }
 
         public T getData() {

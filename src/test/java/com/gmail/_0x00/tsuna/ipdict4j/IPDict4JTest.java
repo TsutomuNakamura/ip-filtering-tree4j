@@ -142,6 +142,17 @@ public class IPDict4JTest
     @Test
     public void push() {
         // getVariableOfInstance();
+        return;
+    }
 
+    @Test
+    public void hogefuga() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        IPDict4J<String> dict = new IPDict4J<>();
+        Class<IPDict4J> c = IPDict4J.class;
+        Method m = c.getDeclaredMethod("hogefuga", String.class, String.class);
+        m.setAccessible(true);
+        m.invoke(dict, "taro", "jiro");
+        //String result = (String)TestUtil.invokeInstanceMethod(dict, "hogefuga", "taro", "jiro");
+        //System.out.println("Result: " + result);
     }
 }
