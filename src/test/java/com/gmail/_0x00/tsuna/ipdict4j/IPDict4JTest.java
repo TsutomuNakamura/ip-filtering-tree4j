@@ -17,22 +17,6 @@ import static com.gmail._0x00.tsuna.ipdict4j.IPDict4J.Node;
  */
 public class IPDict4JTest
 {
-    public Object invokeInstanceMethod(IPDict4J instance, String methodName, Object... args)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class<IPDict4J> c = (Class<IPDict4J>)instance.getClass();
-        Method method = c.getDeclaredMethod(methodName);
-        method.setAccessible(true);
-
-        return method.invoke(instance, args);
-    }
-    public Object invokeStaticMethod(Class<IPDict4J> c, String methodName, Object... args)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = c.getDeclaredMethod(methodName);
-        method.setAccessible(true);
-
-        return method.invoke(args);
-    }
-
     @Test
     public void testconvertIPStringToBinary() {
         IPDict4J<String> i4j = new IPDict4J<String>();
@@ -135,24 +119,11 @@ public class IPDict4JTest
         IPDict4J<String> dict = new IPDict4J<>();
         Node<String> rootNode = dict.getRootNode();
         rootNode.setChildSubnetMaskLength(24);
-        // TODO:
-        //rootNode.getRefToChildren().put(dict.convertIPStringToBinary("192.168.1.0"));
     }
 
     @Test
     public void push() {
         // getVariableOfInstance();
         return;
-    }
-
-    @Test
-    public void hogefuga() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        IPDict4J<String> dict = new IPDict4J<>();
-        Class<IPDict4J> c = IPDict4J.class;
-        Method m = c.getDeclaredMethod("hogefuga", String.class, String.class);
-        m.setAccessible(true);
-        m.invoke(dict, "taro", "jiro");
-        //String result = (String)TestUtil.invokeInstanceMethod(dict, "hogefuga", "taro", "jiro");
-        //System.out.println("Result: " + result);
     }
 }

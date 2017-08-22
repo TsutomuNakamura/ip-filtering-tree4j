@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
  */
 public class IPDict4J <T>
 {
-
-
     private static final String IPV4_DELEMITOR = "\\.";
 
     private static final Pattern IPV4_REGEX
@@ -116,6 +114,9 @@ public class IPDict4J <T>
                     currentNode = currentNode.getRefToChildren().get(ipv4);
                     continue;
                 }
+            } else {
+                // unreachable
+                throw new Exception("Push instruction has gone wrong exception.");
             }
         }
     }
@@ -179,10 +180,6 @@ public class IPDict4J <T>
         Node<T> newCurrentNode
                 = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, rootOfGlueNodes);
         parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
-    }
-
-    private String hogefuga(String hoge, String fuga) {
-        return "arg1: " + hoge + ", arg2: " + fuga;
     }
 
     /**
