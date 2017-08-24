@@ -1,5 +1,7 @@
 package com.gmail._0x00.tsuna.ipdict4j;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -8,33 +10,48 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static com.gmail._0x00.tsuna.ipdict4j.IPDict4J.Node;
+import static org.junit.Assert.*;
+
 /**
  * Unit test for IPDict4J.
  */
 public class IPDict4JTest
 {
+    private IPDict4J<String> dict;
+
+    public <E> void assertTheNode(Node<E> node, E data, int subnetMaskLength, int childSubnetMaskLength, String[] indexesOfChildNodes) {
+        if(indexesOfChildNodes == null) indexesOfChildNodes = new String[0];
+        assertEquals(data, node.getData());
+        assertEquals(subnetMaskLength, node.getSubnetMaskLength());
+        assertEquals(childSubnetMaskLength, node.getChildSubnetMaskLength());
+
+        assertEquals(node.getRefToChildren().size(), indexesOfChildNodes.length);
+        for(String ip : indexesOfChildNodes) {
+            assertNotNull(node.getRefToChildren().get(dict.convertIPStringToBinary(ip)));
+        }
+    }
+
+    @Before
+    public void beforeEach() {
+        dict = new IPDict4J<>();
+    }
+
     @Test
     public void testconvertIPStringToBinary() {
-        IPDict4J<String> i4j = new IPDict4J<String>();
-        assertEquals(0, i4j.convertIPStringToBinary("0.0.0.0"));
-        assertEquals(-1, i4j.convertIPStringToBinary("255.255.255.255"));
-        assertEquals(-256, i4j.convertIPStringToBinary("255.255.255.0"));
-        assertEquals(-65536, i4j.convertIPStringToBinary("255.255.0.0"));
-        assertEquals(-16777216, i4j.convertIPStringToBinary("255.0.0.0"));
-        assertEquals(-1062731520, i4j.convertIPStringToBinary("192.168.1.0"));
-        assertEquals(-1062731519, i4j.convertIPStringToBinary("192.168.1.1"));
-        assertEquals(-1408237568, i4j.convertIPStringToBinary("172.16.0.0"));
-        assertEquals(167772160, i4j.convertIPStringToBinary("10.0.0.0"));
+        assertEquals(0, dict.convertIPStringToBinary("0.0.0.0"));
+        assertEquals(-1, dict.convertIPStringToBinary("255.255.255.255"));
+        assertEquals(-256, dict.convertIPStringToBinary("255.255.255.0"));
+        assertEquals(-65536, dict.convertIPStringToBinary("255.255.0.0"));
+        assertEquals(-16777216, dict.convertIPStringToBinary("255.0.0.0"));
+        assertEquals(-1062731520, dict.convertIPStringToBinary("192.168.1.0"));
+        assertEquals(-1062731519, dict.convertIPStringToBinary("192.168.1.1"));
+        assertEquals(-1408237568, dict.convertIPStringToBinary("172.16.0.0"));
+        assertEquals(167772160, dict.convertIPStringToBinary("10.0.0.0"));
     }
 
     @Test
     public void testHasGlueNodeOnly() {
-        IPDict4J<String> dict = new IPDict4J<>();
-
         // Test it should return false if only one data node is existed.
         Node<String> n = new Node<>();
         Map<Integer, Node<String>> m = new HashMap<>();
@@ -100,7 +117,6 @@ public class IPDict4JTest
 
     @Test
     public void getBinIPv4NetAddr() {
-        IPDict4J<String> dict = new IPDict4J<>();
         assertEquals(dict.convertIPStringToBinary("255.255.255.255"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 32));
         assertEquals(dict.convertIPStringToBinary("255.255.255.254"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 31));
         assertEquals(dict.convertIPStringToBinary("255.255.255.128"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 25));
@@ -116,14 +132,18 @@ public class IPDict4JTest
 
     @Test
     public void createGlueNodes() throws NoSuchFieldException, IllegalAccessException {
-        IPDict4J<String> dict = new IPDict4J<>();
         Node<String> rootNode = dict.getRootNode();
         rootNode.setChildSubnetMaskLength(24);
     }
 
     @Test
-    public void push() {
-        // getVariableOfInstance();
-        return;
+    public void push() throws Exception {
+        // It should get empty root node if no data was pushed
+        Node<String> rootNode = (Node<String>)TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
+        assertTheNode(rootNode, null, 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+        dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+        //assertTheNode(rootNode, "Data of 0.0.0.0/0", 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
     }
 }

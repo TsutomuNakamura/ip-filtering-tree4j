@@ -12,8 +12,11 @@ public class IPDict4J <T>
 {
     private static final String IPV4_DELEMITOR = "\\.";
 
+//    private static final Pattern IPV4_REGEX
+//            = Pattern.compile("^(([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])\\\\.){3}([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])$");
     private static final Pattern IPV4_REGEX
-            = Pattern.compile("^(([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])\\\\.){3}([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])$");
+            = Pattern.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+
 
     public static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
 
