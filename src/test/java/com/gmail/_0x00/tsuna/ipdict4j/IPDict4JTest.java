@@ -142,8 +142,18 @@ public class IPDict4JTest
         Node<String> rootNode = (Node<String>)TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
         assertTheNode(rootNode, null, 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
+        // It should get data 0.0.0.0 if data 0.0.0.0 was pushed
+        dict = new IPDict4J<>();
         dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
-        //assertTheNode(rootNode, "Data of 0.0.0.0/0", 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        rootNode = (Node<String>)TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
+        assertTheNode(rootNode, "Data of 0.0.0.0/0", 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
+        dict = new IPDict4J<>();
+        dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+        dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+        rootNode = (Node<String>)TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
+        assertTheNode(rootNode, "Data of 0.0.0.0/0", 0, 8, new String[]{"10.0.0.0"});
+        Node<String> node = rootNode.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+        assertTheNode(node, "Data of 10.0.0.0/8", 8, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
     }
 }

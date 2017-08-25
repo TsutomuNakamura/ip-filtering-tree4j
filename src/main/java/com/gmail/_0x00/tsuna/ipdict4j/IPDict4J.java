@@ -12,8 +12,6 @@ public class IPDict4J <T>
 {
     private static final String IPV4_DELEMITOR = "\\.";
 
-//    private static final Pattern IPV4_REGEX
-//            = Pattern.compile("^(([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])\\\\.){3}([01]?\\\\d\\\\d?|2[0-4]\\\\d|25[0-5])$");
     private static final Pattern IPV4_REGEX
             = Pattern.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
@@ -71,19 +69,23 @@ public class IPDict4J <T>
                 // Override the data in this glue node
                 parentNode.getRefToChildren().put(
                         networkAddress,
-                        new Node<T>(data, subnetMaskLength, currentNode.getChildSubnetMaskLength(), currentNode.getRefToChildren()));
+                        new Node<>(data, subnetMaskLength, currentNode.getChildSubnetMaskLength(), currentNode.getRefToChildren()));
                 break;
             } else if(subnetLengthOfCurrentNode < subnetMaskLength) {
+
                 if(currentNode.getRefToChildren().isEmpty()) {
                     Node<T> newNode = new Node<>(
                             currentNode.getData(),
                             currentNode.getSubnetMaskLength(),
-                            subnetLengthOfCurrentNode,
+                            subnetMaskLength,
                             currentNode.getRefToChildren());
 
                     newNode.getRefToChildren().put(
                             networkAddress,
-                            new Node<T>(data, subnetMaskLength, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+                            new Node<>(data, subnetMaskLength, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+
+                    parentNode.getRefToChildren().put(lastNetworkAddress, newNode);
+
                     break;
                 }
 
