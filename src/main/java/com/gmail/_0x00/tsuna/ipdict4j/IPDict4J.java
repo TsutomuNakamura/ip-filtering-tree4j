@@ -34,13 +34,13 @@ public class IPDict4J <T>
     }
 
 
-    public void push(String ipAddress, int subnetMaskLength, T data) throws Exception {
+    public IPDict4J push(String ipAddress, int subnetMaskLength, T data) throws Exception {
         if(!IPV4_REGEX.matcher(ipAddress).matches())
             throw new Exception("String of IPv4 " + ipAddress + " is invalid");
         if(data == null)
             throw new Exception("TODO: Cannot push null as data");
 
-        pushDataToIPv4Tree(
+        return pushDataToIPv4Tree(
                 root,
                 root.getRefToChildren().get(0),
                 convertIPStringToBinary(ipAddress),
@@ -52,7 +52,7 @@ public class IPDict4J <T>
         return root.getRefToChildren().get(0);
     }
 
-    private void pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws Exception {
+    private IPDict4J<T> pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws Exception {
         Node<T> currentNode     = node;
         Node<T> parentNode      = pNode;
         int lastNetworkAddress  = 0;
@@ -109,7 +109,7 @@ public class IPDict4J <T>
                     currentNode         = currentNode.getRefToChildren().get(childNetworkAddress);
                     lastNetworkAddress  = getBinIPv4NetAddr(ipv4, currentNode.getSubnetMaskLength());
                     continue;
-                } else {
+                } else {  /* currentNode.getChildSubnetMaskLength() == subnetMaskLength */
                     if(currentNode.getRefToChildren().get(ipv4) == null) {
                         currentNode.getRefToChildren().put(
                                 ipv4,
@@ -124,6 +124,8 @@ public class IPDict4J <T>
                 throw new Exception("Push instruction has gone wrong exception.");
             }
         }
+
+        return this;
     }
 
     /**
