@@ -167,6 +167,13 @@ public class IPDict4J <T>
         return (masks[subnetMaskLength] & ipv4);
     }
 
+    /**
+     * Create glue node with at specific length
+     * @param currentNode node that the glue nodes will be created
+     * @param parentNode parent node of currentNode
+     * @param netAddrToCurrent net address to current node from parent node
+     * @param subnetMaskLength subnet mask length of the glue node that will be created under currentNode
+     */
     public void createGlueNodes(Node<T> currentNode, Node<T> parentNode, int netAddrToCurrent, int subnetMaskLength) {
         Map<Integer, Node<T>> childNodes        = currentNode.getRefToChildren();
         Map<Integer, Node<T>> rootOfGlueNodes   = new HashMap<>();
@@ -174,13 +181,11 @@ public class IPDict4J <T>
         for(Map.Entry<Integer, Node<T>> e : childNodes.entrySet()) {
             int netAddress = getBinIPv4NetAddr(e.getKey(), subnetMaskLength);
 
-            //if(node.getNodeToRefToChildren(netAddress) == null) {
-            if(currentNode.getRefToChildren().get(netAddress) == null) {
+            if(rootOfGlueNodes.get(netAddress) == null) {
                 rootOfGlueNodes.put(
                         netAddress,
                         new Node<>(null, subnetMaskLength, currentNode.getChildSubnetMaskLength(), new HashMap<>()));
             }
-            Node<T> glueNode = rootOfGlueNodes.get(netAddress);
             rootOfGlueNodes.get(netAddress).getRefToChildren().put( e.getKey(), childNodes.get(e.getKey()) );
         }
 
