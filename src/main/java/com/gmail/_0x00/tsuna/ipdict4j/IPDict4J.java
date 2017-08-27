@@ -33,7 +33,6 @@ public class IPDict4J <T>
         }
     }
 
-
     public IPDict4J push(String ipAddress, int subnetMaskLength, T data) throws Exception {
         if(!IPV4_REGEX.matcher(ipAddress).matches())
             throw new Exception("String of IPv4 " + ipAddress + " is invalid");
@@ -90,12 +89,10 @@ public class IPDict4J <T>
                 }
 
                 if(currentNode.getChildSubnetMaskLength() > subnetMaskLength) {
-                    // TODO:
                     // Create glue node then check the glue node's network address
+                    // If data node was already existed, createGlueNodes does nothing then continues then throws error.
                     createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength);
-                    currentNode.getRefToChildren().put(
-                            networkAddress, new Node<>(data, subnetMaskLength, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-                    break;
+                    currentNode = parentNode.getRefToChildren().get(lastNetworkAddress);
                 } else if(currentNode.getChildSubnetMaskLength() < subnetMaskLength) {
                     // continue then new node will be appended
                     int childNetworkAddress = getBinIPv4NetAddr(ipv4, currentNode.getChildSubnetMaskLength());
