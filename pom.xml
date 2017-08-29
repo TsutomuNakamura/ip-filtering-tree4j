@@ -9,9 +9,9 @@
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
-      <groupId>org.junit</groupId>
-      <artifactId>junit5-api</artifactId>
-      <version>5.0.0-ALPHA</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>RELEASE</version>
     </dependency>
   </dependencies>
   <build>
