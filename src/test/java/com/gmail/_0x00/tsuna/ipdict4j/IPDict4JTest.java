@@ -958,7 +958,7 @@ public class IPDict4JTest
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
             assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
-         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 172.16.0.0/16")
+        @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 172.16.0.0/16")
         void push_63a59606_1820_4e2d_8422_9fe0ce204b73() throws Exception {
             /*
                 +-------------------------+
@@ -996,11 +996,71 @@ public class IPDict4JTest
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
             assertTheNode(node1, null, 16, 24, new String[]{"192.169.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
-            assertTheNode(node1, "Data of 192.169.1.0", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, null, 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
             assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+
+        @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 192.169.1.0/24, 172.16.0.0/16")
+        void push_9dd17911_34a0_4f73_9286_a210671e7283() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+---------------------------+
+                  | Create a glue node        | Create a glue node        |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 3)172.16.0.0/16(d)      |
+                +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 1) 192.168.1.0/24(d)    | | 2) 192.169.1.0/24(d)    |
+                +-------------------------+ +-------------------------+
+            */
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            assertSetType3(dict);
+        }
+        @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 172.16.0.0/16, 192.169.1.0/24")
+        void push_472f3c16_5347_468a_b94e_f9a8cb1991a8() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+---------------------------+
+                  | Create a glue node        | Create a glue node        |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 2)172.16.0.0/16(d)      |
+                +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 1) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
+                +-------------------------+ +-------------------------+
+            */
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            assertSetType3(dict);
+        }
+
+        void assertSetType5(dict) {
+            Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
+            assertTheNode(node, null, 0, 8, new String[]{"192.0.0.0", "172.0.0.0", "10.0.0.0"});
+            Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.0.0.0"));
+            assertTheNode(node, null, 8, 16, new String[]{"192.168.0.0", "192.169.0.0"});
+            Node<String> node2 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
+            // TODO:
+        }
+
+
+        @Test @DisplayName("should be able to push nodes ")
+        void push_() throws Exception {
+            // TODO:
         }
     }
 }
