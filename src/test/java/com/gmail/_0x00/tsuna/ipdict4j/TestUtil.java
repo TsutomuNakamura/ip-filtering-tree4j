@@ -15,10 +15,14 @@ public class TestUtil {
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         return invokeMethod(null, c, methodName, types, args);
     }
+    public static <E> Method getMethod(Class<E> clazz, String methodName, Class [] types) throws NoSuchMethodException {
+        Method m = clazz.getDeclaredMethod(methodName, types);
+        m.setAccessible(true);
+        return m;
+    }
     private static <E> Object invokeMethod(E instance, Class<E> c, String methodName, Class[] types, Object... args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method method = c.getDeclaredMethod(methodName, types);
-        method.setAccessible(true);
+        Method method = getMethod(c, methodName, types);
         if(instance == null)
             return method.invoke(args);
         return method.invoke(instance, args);
