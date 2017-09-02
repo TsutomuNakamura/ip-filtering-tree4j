@@ -89,7 +89,7 @@ public class IPDict4JTest
     class TestHasGlueNodeOnly {
         Node<String> n;
         Map<Integer, Node<String>> m;
-        Method method = getMethod(IPDict4J.class, "hasGlueNodeOnly");
+        Method method;
 
         @BeforeEach
         void beforeEach() throws NoSuchMethodException {
@@ -102,32 +102,32 @@ public class IPDict4JTest
         void hasGlueNodeOnly_bf5c1d3e_7750_4b9c_9a54_9ebbbf7cda60() throws Exception {
             m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse((Boolean) method.invoke(n));
+            assertFalse((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return false if any node is not existed")
         void hasGlueNodeOnly_76958da8_afd0_4db9_af35_ae335c78896f() throws Exception {
             n.setRefToChildren(m);
-            assertFalse((Boolean) method.invoke(n));
+            assertFalse((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return true if only glue node is existed")
         void hasGlueNodeOnly_47204aec_1d7b_46fb_beee_533d5800ec06() throws Exception  {
             m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertTrue((Boolean) method.invoke(n));
+            assertTrue((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return false if some data nodes existed but glue node isn't")
         void hasGlueNodeOnly_8c038ec4_b696_475e_90c6_0b3afd661d88() throws Exception {
             m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>("Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse((Boolean) method.invoke(n));
+            assertFalse((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return true if some glue nodes existed but data node isn't")
         void hasGlueNodeOnly_6e7bb0ca_a638_4eab_88ce_d4f9d47ce3fd() throws Exception {
             m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertTrue((Boolean) method.invoke(n));
+            assertTrue((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return false if data node is existed in some glue nodes (pattern 1)")
         void hasGlueNodeOnly_8e3ba196_4d44_4aec_a574_32d20545fb25() throws Exception {
@@ -135,7 +135,7 @@ public class IPDict4JTest
             m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse((Boolean) method.invoke(n));
+            assertFalse((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return false if data node is existed in some glue nodes (pattern 2)")
         void hasGlueNodeOnly_96199c89_df9b_489c_8108_1777a674bb33() throws Exception {
@@ -143,7 +143,7 @@ public class IPDict4JTest
             m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>("Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse((Boolean) method.invoke(n));
+            assertFalse((Boolean) method.invoke(dict, n));
         }
         @Test @DisplayName("should return false if data node is existed in some glue nodes (pattern 3)")
         void hasGlueNodeOnly_15227bd7_251f_48e0_99d9_e56627439fa0() throws Exception {
@@ -151,56 +151,62 @@ public class IPDict4JTest
             m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>("Data of 192.168.3.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse((Boolean) method.invoke(n));
+            assertFalse((Boolean) method.invoke(dict, n));
         }
     }
 
     @Nested
     @DisplayName("getBinIPv4NetAddr")
     class TestGetBinIPv4NetAddr {
+        Method method;
+        @BeforeEach
+        void beforeEach() throws Exception {
+            method = TestUtil.getMethod(dict.getClass(), "getBinIPv4NetAddr", new Class[]{int.class, int.class});
+        }
+
         @Test @DisplayName("should return 255.255.255.255(binary) if parameter 255.255.255.255(binary) and 32 were passed")
-        void getBinIPv4NetAddr_29ef82f9_65c3_4489_ba42_6f33f34c25bb() {
-            assertEquals(dict.convertIPStringToBinary("255.255.255.255"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 32));
+        void getBinIPv4NetAddr_29ef82f9_65c3_4489_ba42_6f33f34c25bb() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("255.255.255.255"),  method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 32));
         }
         @Test @DisplayName("should return 255.255.255.254(binary) if parameter 255.255.255.255(binary) and 31 were passed")
-        void getBinIPv4NetAddr_8359cbe6_4605_47de_971f_fff00a96fb2b() {
-            assertEquals(dict.convertIPStringToBinary("255.255.255.254"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 31));
+        void getBinIPv4NetAddr_8359cbe6_4605_47de_971f_fff00a96fb2b() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("255.255.255.254"), method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 31));
         }
         @Test @DisplayName("should return 255.255.255.128(binary) if parameter 255.255.255.255(binary) and 25 were passed")
-        void getBinIPv4NetAddr_2d2f0dfc_da13_49c1_8eeb_b6e517a8f01f() {
-            assertEquals(dict.convertIPStringToBinary("255.255.255.128"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 25));
+        void getBinIPv4NetAddr_2d2f0dfc_da13_49c1_8eeb_b6e517a8f01f() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("255.255.255.128"), method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 25));
         }
         @Test @DisplayName("should return 255.255.255.0(binary) if parameter 255.255.255.255(binary) and 24 were passed")
-        void getBinIPv4NetAddr_3fcb34f0_13c4_48f2_99ee_5bb2b0ba00d0() {
-            assertEquals(dict.convertIPStringToBinary("255.255.255.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 24));
+        void getBinIPv4NetAddr_3fcb34f0_13c4_48f2_99ee_5bb2b0ba00d0() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("255.255.255.0"), method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 24));
         }
         @Test @DisplayName("should return 255.255.0.0(binary) if parameter 255.255.255.255(binary) and 16 were passed")
-        void getBinIPv4NetAddr_e32f7866_c1b1_45d0_b2c4_02d2dc04bdbd() {
-            assertEquals(dict.convertIPStringToBinary("255.255.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 16));
+        void getBinIPv4NetAddr_e32f7866_c1b1_45d0_b2c4_02d2dc04bdbd() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("255.255.0.0"), method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 16));
         }
         @Test @DisplayName("should return 255.0.0.0(binary) if parameter 255.255.255.255(binary) and 8 were passed")
-        void getBinIPv4NetAddr_46799fd5_d246_4ad6_a2df_765ca783e6de() {
-            assertEquals(dict.convertIPStringToBinary("255.0.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 8));
+        void getBinIPv4NetAddr_46799fd5_d246_4ad6_a2df_765ca783e6de() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("255.0.0.0"), method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 8));
         }
         @Test @DisplayName("should return 0.0.0.0(binary) if parameter 255.255.255.255(binary) and 0 were passed")
-        void getBinIPv4NetAddr_3d8f7375_a0a9_408d_a7c1_9f2da76ed510() {
-            assertEquals(dict.convertIPStringToBinary("0.0.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("255.255.255.255"), 0));
+        void getBinIPv4NetAddr_3d8f7375_a0a9_408d_a7c1_9f2da76ed510() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("0.0.0.0"), method.invoke(dict, dict.convertIPStringToBinary("255.255.255.255"), 0));
         }
         @Test @DisplayName("should return 192.168.1.0(binary) if parameter 192.168.1.128(binary) and 24 were passed")
-        void getBinIPv4NetAddr_9492a286_b69c_47a7_97df_69b24b17b65a() {
-            assertEquals(dict.convertIPStringToBinary("192.168.1.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 24));
+        void getBinIPv4NetAddr_9492a286_b69c_47a7_97df_69b24b17b65a() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("192.168.1.0"), method.invoke(dict, dict.convertIPStringToBinary("192.168.1.128"), 24));
         }
         @Test @DisplayName("should return 192.168.1.128(binary) if parameter 192.168.1.128(binary) and 25 were passed")
-        void getBinIPv4NetAddr_f277cd09_4c91_42fe_9a25_3f953c0e5ef9() {
-            assertEquals(dict.convertIPStringToBinary("192.168.1.128"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 25));
+        void getBinIPv4NetAddr_f277cd09_4c91_42fe_9a25_3f953c0e5ef9() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("192.168.1.128"), method.invoke(dict, dict.convertIPStringToBinary("192.168.1.128"), 25));
         }
         @Test @DisplayName("should return 192.168.0.0(binary) if parameter 192.168.1.128(binary) and 16 were passed")
-        void getBinIPv4NetAddr_03b9f79d_9756_4e0e_95b0_c6d3a417b294() {
-            assertEquals(dict.convertIPStringToBinary("192.168.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 16));
+        void getBinIPv4NetAddr_03b9f79d_9756_4e0e_95b0_c6d3a417b294() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("192.168.0.0"), method.invoke(dict, dict.convertIPStringToBinary("192.168.1.128"), 16));
         }
         @Test @DisplayName("should return 192.0.0.0(binary) if parameter 192.168.1.128(binary) and 8 were passed")
-        void getBinIPv4NetAddr_d48e0188_e0c5_4ee4_b7c5_3f1baf4a1aee() {
-            assertEquals(dict.convertIPStringToBinary("192.0.0.0"), dict.getBinIPv4NetAddr(dict.convertIPStringToBinary("192.168.1.128"), 8));
+        void getBinIPv4NetAddr_d48e0188_e0c5_4ee4_b7c5_3f1baf4a1aee() throws Exception {
+            assertEquals(dict.convertIPStringToBinary("192.0.0.0"), method.invoke(dict, dict.convertIPStringToBinary("192.168.1.128"), 8));
         }
     }
 

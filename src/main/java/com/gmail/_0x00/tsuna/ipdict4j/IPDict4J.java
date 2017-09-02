@@ -159,7 +159,7 @@ public class IPDict4J <T>
         return !m.entrySet().stream().anyMatch(e -> e.getValue().getData() != null);
     }
 
-    public void rebalanceChildGlueNode(Node<T> node, Node<T> parentNode, int keyOfCurrentNode) {
+    private void rebalanceChildGlueNode(Node<T> node, Node<T> parentNode, int keyOfCurrentNode) {
         if(node.getChildSubnetMaskLength() == 32 ||
                 node.getChildSubnetMaskLength() == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED ||
                 hasGlueNodeOnly(node)) {
@@ -206,7 +206,7 @@ public class IPDict4J <T>
      * @param subnetMaskLength the length of subnetmask
      * @return network address
      */
-    public int getBinIPv4NetAddr(int ipv4, int subnetMaskLength) {
+    private int getBinIPv4NetAddr(int ipv4, int subnetMaskLength) {
         return (masks[subnetMaskLength] & ipv4);
     }
 
