@@ -217,7 +217,7 @@ public class IPDict4J <T>
      * @param netAddrToCurrent net address to current node from parent node
      * @param subnetMaskLength subnet mask length of the glue node that will be created under currentNode
      */
-    public void createGlueNodes(Node<T> currentNode, Node<T> parentNode, int netAddrToCurrent, int subnetMaskLength) {
+    private void createGlueNodes(Node<T> currentNode, Node<T> parentNode, int netAddrToCurrent, int subnetMaskLength) {
         Map<Integer, Node<T>> childNodes        = currentNode.getRefToChildren();
         Map<Integer, Node<T>> rootOfGlueNodes   = new HashMap<>();
 

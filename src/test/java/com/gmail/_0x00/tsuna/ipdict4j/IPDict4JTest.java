@@ -213,6 +213,11 @@ public class IPDict4JTest
     @Nested
     @DisplayName("createGlueNodes")
     class TestCreateGlueNodes {
+        Method method;
+        @BeforeEach
+        void beforeEach() throws Exception {
+            method = TestUtil.getMethod(IPDict4J.class, "createGlueNodes", new Class[]{Node.class, Node.class, int.class, int.class});
+        }
         @Test @DisplayName("should create a single glue node under the middle of data node")
         void createGluenodes_075a1add_3ef1_4149_a245_728c0813f9f4() throws Exception {
             /*
@@ -239,7 +244,7 @@ public class IPDict4JTest
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
-            dict.createGlueNodes(node, (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 16);
+            method.invoke(dict, node, (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 16);
 
             node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node,"Data of 0.0.0.0/0", 0, 16, new String[]{"192.168.0.0"});
@@ -281,10 +286,12 @@ public class IPDict4JTest
             */
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.createGlueNodes(
+            method.invoke(
+                    dict,
                     (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
                     (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 16);
-            dict.createGlueNodes(
+            method.invoke(
+                    dict,
                     (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
                     (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 8);
 
@@ -332,7 +339,8 @@ public class IPDict4JTest
             dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
             dict.push("192.168.129.0", 24, "Data of 192.168.129.0/24");
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
-            dict.createGlueNodes(
+            method.invoke(
+                    dict,
                     node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0")),
                     node, dict.convertIPStringToBinary("192.168.0.0"), 17);
             node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
@@ -377,7 +385,8 @@ public class IPDict4JTest
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
-            dict.createGlueNodes(
+            method.invoke(
+                    dict,
                     (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
                     (Node<String>) TestUtil.getInstanceField(dict, "root"),
                     0, 16);
@@ -420,9 +429,10 @@ public class IPDict4JTest
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
             dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
-            dict.createGlueNodes(
-                (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
-                (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
+            method.invoke(
+                    dict,
+                    (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
+                    (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node,"Data of 0.0.0.0/0", 0, 17, new String[]{"192.168.128.0", "192.168.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
@@ -467,9 +477,10 @@ public class IPDict4JTest
             dict.push("192.168.172.0", 24, "Data of 192.168.172.0/24");
             dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
             dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
-            dict.createGlueNodes(
-                (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
-                (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
+            method.invoke(
+                    dict,
+                    (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
+                    (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node,"Data of 0.0.0.0/0", 0, 17, new String[]{"192.168.128.0", "192.168.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
@@ -519,9 +530,10 @@ public class IPDict4JTest
             dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
             dict.push("192.168.64.0", 24, "Data of 192.168.64.0/24");
             dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
-            dict.createGlueNodes(
-                (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
-                (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
+            method.invoke(
+                    dict,
+                    (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
+                    (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
 
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node,"Data of 0.0.0.0/0", 0, 17, new String[]{"192.168.128.0", "192.168.0.0"});
@@ -571,9 +583,10 @@ public class IPDict4JTest
             dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
             dict.push("192.168.64.0", 24, "Data of 192.168.64.0/24");
             dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
-            dict.createGlueNodes(
-                (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
-                (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
+            method.invoke(
+                    dict,
+                    (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null),
+                    (Node<String>) TestUtil.getInstanceField(dict, "root"), 0, 17);
 
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node,"Data of 0.0.0.0/0", 0, 17, new String[]{"192.168.128.0", "192.168.0.0"});
