@@ -2,16 +2,15 @@ package com.gmail._0x00.tsuna.ipdict4j;
 
 
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.gmail._0x00.tsuna.ipdict4j.IPDict4J.Node;
+import static com.sun.org.glassfish.gmbal.ManagedObjectManagerFactory.getMethod;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -20,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IPDict4JTest
 {
     private IPDict4J<String> dict;
+    private int SUBNETMASK_LENGTH_IS_UNDEFINED;
 
     public <E> void assertTheNode(Node<E> node, E data, int subnetMaskLength, int childSubnetMaskLength, String[] indexesOfChildNodes) {
         if(indexesOfChildNodes == null) indexesOfChildNodes = new String[0];
@@ -34,8 +34,9 @@ public class IPDict4JTest
     }
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws NoSuchFieldException, IllegalAccessException {
         dict = new IPDict4J<>();
+        SUBNETMASK_LENGTH_IS_UNDEFINED = (int)TestUtil.getStaticField(IPDict4J.class, "SUBNETMASK_LENGTH_IS_UNDEFINED");
     }
 
     /**
@@ -86,69 +87,71 @@ public class IPDict4JTest
     @Nested
     @DisplayName("hasGlueNodeOnly")
     class TestHasGlueNodeOnly {
-        Node<String> n = new Node<>();
-        Map<Integer, Node<String>> m = new HashMap<>();
+        Node<String> n;
+        Map<Integer, Node<String>> m;
+        Method method = getMethod(IPDict4J.class, "hasGlueNodeOnly");
 
         @BeforeEach
-        void beforeEach() {
+        void beforeEach() throws NoSuchMethodException {
             n = new Node<>();
             m = new HashMap<>();
+            method = TestUtil.getMethod(IPDict4J.class, "hasGlueNodeOnly", new Class[]{Node.class});
         }
 
         @Test @DisplayName("should return false if only one data node is existed")
-        void hasGlueNodeOnly_bf5c1d3e_7750_4b9c_9a54_9ebbbf7cda60() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_bf5c1d3e_7750_4b9c_9a54_9ebbbf7cda60() throws Exception {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse(dict.hasGlueNodeOnly(n));
+            assertFalse((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return false if any node is not existed")
-        void hasGlueNodeOnly_76958da8_afd0_4db9_af35_ae335c78896f() {
+        void hasGlueNodeOnly_76958da8_afd0_4db9_af35_ae335c78896f() throws Exception {
             n.setRefToChildren(m);
-            assertFalse(dict.hasGlueNodeOnly(n));
+            assertFalse((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return true if only glue node is existed")
-        void hasGlueNodeOnly_47204aec_1d7b_46fb_beee_533d5800ec06() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_47204aec_1d7b_46fb_beee_533d5800ec06() throws Exception  {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertTrue(dict.hasGlueNodeOnly(n));
+            assertTrue((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return false if some data nodes existed but glue node isn't")
-        void hasGlueNodeOnly_8c038ec4_b696_475e_90c6_0b3afd661d88() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>("Data of 192.168.2.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_8c038ec4_b696_475e_90c6_0b3afd661d88() throws Exception {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>("Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse(dict.hasGlueNodeOnly(n));
+            assertFalse((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return true if some glue nodes existed but data node isn't")
-        void hasGlueNodeOnly_6e7bb0ca_a638_4eab_88ce_d4f9d47ce3fd() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_6e7bb0ca_a638_4eab_88ce_d4f9d47ce3fd() throws Exception {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertTrue(dict.hasGlueNodeOnly(n));
+            assertTrue((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return false if data node is existed in some glue nodes (pattern 1)")
-        void hasGlueNodeOnly_8e3ba196_4d44_4aec_a574_32d20545fb25() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_8e3ba196_4d44_4aec_a574_32d20545fb25() throws Exception {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>("Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse(dict.hasGlueNodeOnly(n));
+            assertFalse((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return false if data node is existed in some glue nodes (pattern 2)")
-        void hasGlueNodeOnly_96199c89_df9b_489c_8108_1777a674bb33() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>("Data of 192.168.2.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_96199c89_df9b_489c_8108_1777a674bb33() throws Exception {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>("Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse(dict.hasGlueNodeOnly(n));
+            assertFalse((Boolean) method.invoke(n));
         }
         @Test @DisplayName("should return false if data node is existed in some glue nodes (pattern 3)")
-        void hasGlueNodeOnly_15227bd7_251f_48e0_99d9_e56627439fa0() {
-            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-            m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>("Data of 192.168.3.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+        void hasGlueNodeOnly_15227bd7_251f_48e0_99d9_e56627439fa0() throws Exception {
+            m.put(dict.convertIPStringToBinary("192.168.1.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.2.0"), new Node<>(null, 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
+            m.put(dict.convertIPStringToBinary("192.168.3.0"), new Node<>("Data of 192.168.3.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
             n.setRefToChildren(m);
-            assertFalse(dict.hasGlueNodeOnly(n));
+            assertFalse((Boolean) method.invoke(n));
         }
     }
 
@@ -237,7 +240,7 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node, null, 16, 24, new String[]{"192.168.1.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create 1 glue node over the 2 data nodes")
         void createGluenodes_227a31ae_1ff1_43d0_a377_a217091e343e() throws Exception {
@@ -286,7 +289,7 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node,null, 16, 24, new String[]{"192.168.1.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node,"Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node,"Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create a single glue node under the middle of data node")
         void createGluenodes_3c7d46aa_b6e0_499d_8602_eacc4092b15a() throws Exception {
@@ -333,7 +336,7 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
             assertTheNode(node, null, 17, 24, new String[]{"192.168.129.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.129.0"));
-            assertTheNode(node, "Data of 192.168.129.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 192.168.129.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create 1 glue node over the 2 data nodes")
         void createGluenodes_9ecd5f66_085e_4be9_8a74_9c2bda18935e() throws Exception {
@@ -377,9 +380,9 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node, null, 16, 24, new String[]{"192.168.128.0", "192.168.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
-            assertTheNode(node1, "Data of 192.168.128.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.128.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
-            assertTheNode(node1, "Data of 192.168.0.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.0.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create 2 glue node that has 1 child data node")
         void createGluenodes_() throws Exception {
@@ -419,11 +422,11 @@ public class IPDict4JTest
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
             assertTheNode(node1,null, 17, 24, new String[]{"192.168.128.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
-            assertTheNode(node1,"Data of 192.168.128.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1,"Data of 192.168.128.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1,null, 17, 24, new String[]{"192.168.0.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
-            assertTheNode(node1,"Data of 192.168.0.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1,"Data of 192.168.0.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create 2 glue node that has 2 child data node and has 1 child data node")
         void createGluenodes_25ea8b7b_0bd8_47a8_872e_ba861fa420aa() throws Exception {
@@ -466,14 +469,14 @@ public class IPDict4JTest
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
             assertTheNode(node1, null, 17, 24, new String[]{"192.168.172.0", "192.168.128.0"});
             Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.172.0"));
-            assertTheNode(node2, "Data of 192.168.172.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.172.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
-            assertTheNode(node2, "Data of 192.168.128.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.128.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, null, 17, 24, new String[]{"192.168.0.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
-            assertTheNode(node1, "Data of 192.168.0.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.0.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create 2 glue node that has 1 child data node and has 2 child data node")
         void createGluenodes_6f4a6031_a522_400d_a309_b90daf16c27f() throws Exception {
@@ -519,14 +522,14 @@ public class IPDict4JTest
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
             assertTheNode(node1, null, 17, 24, new String[]{"192.168.128.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
-            assertTheNode(node1, "Data of 192.168.128.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.128.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, null, 17, 24, new String[]{"192.168.64.0", "192.168.0.0"});
             Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.64.0"));
-            assertTheNode(node2, "Data of 192.168.64.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.64.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
-            assertTheNode(node2, "Data of 192.168.0.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.0.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should create 2 glue node that has 2 child data node and has 2 child data node")
         void createGluenodes_29e13466_b1c9_44a6_9452_f4be5c31e4fa() throws Exception {
@@ -571,16 +574,16 @@ public class IPDict4JTest
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
             assertTheNode(node1, null, 17, 24, new String[]{"192.168.172.0", "192.168.128.0"});
             Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.172.0"));
-            assertTheNode(node2, "Data of 192.168.172.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.172.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.128.0"));
-            assertTheNode(node2, "Data of 192.168.128.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.128.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, null, 17, 24, new String[]{"192.168.64.0", "192.168.0.0"});
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.64.0"));
-            assertTheNode(node2, "Data of 192.168.64.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.64.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
-            assertTheNode(node2, "Data of 192.168.0.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.0.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
     }
 
@@ -601,7 +604,7 @@ public class IPDict4JTest
             } catch(Exception e) {
                 e.printStackTrace();
             }
-            assertTheNode(node, null, 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, null, 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push a root node 0.0.0.0/0")
         void push_78b15ca5_c107_4bdd_af16_2c134006fdd7() throws Exception {
@@ -612,7 +615,7 @@ public class IPDict4JTest
             */
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push a single node 128.0.0.0/1")
         void push_972390b4_915e_425e_b95a_03ba8cda7101() throws Exception {
@@ -621,7 +624,7 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, "Data of 0.0.0.0/0", 0, 1, new String[]{"128.0.0.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("128.0.0.0"));
-            assertTheNode(node, "Data of 128.0.0.0/1", 1, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 128.0.0.0/1", 1, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push 128.0.0.0/1, 0.0.0.0/1")
         void push_b25a9247_750e_48b5_9d93_d9e3a4944d4b() throws Exception {
@@ -642,9 +645,9 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, "Data of 0.0.0.0/0", 0, 1, new String[]{"128.0.0.0", "0.0.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("128.0.0.0"));
-            assertTheNode(node1, "Data of 128.0.0.0/1", 1, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 128.0.0.0/1", 1, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
-            assertTheNode(node1, "Data of 0.0.0.0/1", 1, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 0.0.0.0/1", 1, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push a node 255.255.255.255/32")
         void push_63247792_e6d7_4442_95c7_993fe9b619b9() throws Exception {
@@ -661,7 +664,7 @@ public class IPDict4JTest
             Node<String > node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 32, new String[]{"255.255.255.255"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("255.255.255.255"));
-            assertTheNode(node, "Data of 255.255.255.255/32", 32, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 255.255.255.255/32", 32, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push nodes 255.255.255.255/32, 255.255.255.254/32")
         void push_5e5dc0d9_2bb5_4f8c_a151_f7bd4fd6ac38() throws Exception {
@@ -682,9 +685,9 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 32, new String[]{"255.255.255.255", "255.255.255.254"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("255.255.255.255"));
-            assertTheNode(node1, "Data of 255.255.255.255/32", 32, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 255.255.255.255/32", 32, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("255.255.255.254"));
-            assertTheNode(node1, "Data of 255.255.255.254/32", 32, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 255.255.255.254/32", 32, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24")
         void push_07855e9e_b7a0_4b8a_a002_bae6fd7c910f() throws Exception {
@@ -701,7 +704,7 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 24, new String[]{"192.168.1.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push node 192.168.1.0/24, 192.168.2.0/24")
         void push_12c6700c_60ba_4386_85e0_a99502e9a4b4() throws Exception {
@@ -721,9 +724,9 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 24, new String[]{"192.168.1.0", "192.168.2.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.2.0"));
-            assertTheNode(node1, "Data of 192.168.2.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push node 192.168.0.0/16, 192.168.1.0/24")
         void push_d03d4cb0_6599_475e_9d28_8a8ae833ef0d() throws Exception {
@@ -747,7 +750,7 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push node 192.168.0.0/16, 192.168.1.0/24, 192.168.2.0/24")
         void push_f392c146_65cb_4ec8_ae4f_4fb8b7ea21d5() throws Exception {
@@ -775,9 +778,9 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0", "192.168.2.0"});
             Node<String> node2 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node2, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node2 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.2.0"));
-            assertTheNode(node2, "Data of 192.168.2.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push node 192.168.0.0/16, 192.168.1.0/24, 172.16.0.0/16")
         void push_4573ecb2_0f9c_4840_b65a_148b59d14070() throws Exception {
@@ -803,11 +806,11 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, "Data of 0.0.0.0/0", 0, 16, new String[]{"192.168.0.0", "172.16.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push node 192.168.1.0/24, 192.168.0.0/16")
         void push_a98d5bbc_9293_4141_8721_cfaf506c7274() throws Exception {
@@ -832,7 +835,7 @@ public class IPDict4JTest
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push node 192.168.1.0/24, 192.168.0.0/16, 192.168.2.0/24")
         void push_df72db48_faa0_4b62_9a01_e3c8e0b7877f() throws Exception {
@@ -860,9 +863,9 @@ public class IPDict4JTest
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0", "192.168.2.0"});
             Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node2, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.2.0"));
-            assertTheNode(node2, "Data of 192.168.2.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 192.168.0.0/16, 172.16.0.0/16")
         void push_4f744252_733f_4949_a4ed_5582e9140a00() throws Exception {
@@ -888,11 +891,11 @@ public class IPDict4JTest
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, "Data of 0.0.0.0/0", 0, 16, new String[]{"192.168.0.0", "172.16.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 192.168.0.0/16, 192.0.0.0/8")
         void push_39711a8a_199e_44c5_93de_da5deb14ffec() throws Exception {
@@ -924,7 +927,7 @@ public class IPDict4JTest
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 192.0.0.0/8, 192.168.0.0/16")
         void push_65562f6a_d5e5_4ca4_a572_b11c9243f3ba() throws Exception {
@@ -956,7 +959,7 @@ public class IPDict4JTest
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, "Data of 192.168.0.0/16", 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 172.16.0.0/16")
         void push_63a59606_1820_4e2d_8422_9fe0ce204b73() throws Exception {
@@ -982,25 +985,25 @@ public class IPDict4JTest
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, null, 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
 
         void assertSetType3(IPDict4J<String> dict) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 16, new String[]{"192.168.0.0", "192.169.0.0", "172.16.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
             assertTheNode(node1, null, 16, 24, new String[]{"192.169.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
-            assertTheNode(node1, "Data of 192.169.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node1, null, 16, 24, new String[]{"192.168.1.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
 
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 192.169.1.0/24, 172.16.0.0/16")
@@ -1056,20 +1059,20 @@ public class IPDict4JTest
             Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
             assertTheNode(node2, null, 16, 24, new String[]{"192.168.1.0"});
             node2 = node2.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
-            assertTheNode(node2, "Data of 192.168.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
             assertTheNode(node2, "Data of 192.169.0.0/16", 16, 24, new String[]{"192.169.1.0"});
             node2 = node2.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
-            assertTheNode(node2, "Data of 192.169.1.0/24", 24, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
             assertTheNode(node1, null, 8, 16, new String[]{"172.16.0.0"});
             node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
-            assertTheNode(node1, "Data of 10.0.0.0/8", 8, IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
 
         @Test @DisplayName("should be able to push nodes 192.168.1.0/24, 192.168.1.0/24, 172.16.0.0/16, 10.0.0.0/8, 192.169.0.0/16")
@@ -1135,12 +1138,53 @@ public class IPDict4JTest
             assertSetType5(dict);
         }
 
-        @Test @DisplayName("should be able to push nodes ")
+        @Test @DisplayName("should be able to push nodes 10.0.0.0/8, 172.16.0.0/16, 192.168.1.0/24, 192.169.0.0/16, 192.168.1.0/24")
         void push_7d52e584_f03b_4192_a81b_ed8f6a79c9bf() throws Exception {
-            // TODO:
-
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +-------------------------------------------------------+---------------------------+
+                  | Create a glue node                                    | Create a glue node        |
+                +-------------------------+                             +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 5)10.0.0.0/8(d)         |
+                +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
+                  |                                                       |
+                  +---------------------------+ Create a data node        |
+                  | Create a glue node        | then push a data node     |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 3) 192.169.0.0/16(g)    | | 2)172.16.0.0/16(d)      |
+                +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 1) 192.168.1.0/24(d)    | | 4) 192.169.1.0/24(d)    |
+                +-------------------------+ +-------------------------+
+            */
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             assertSetType5(dict);
         }
+    }
 
+    @Nested
+    @DisplayName("rebalanceChildGlueNode")
+    class TestRebalanceChildGlueNode {
+        Method method = null;
+        @BeforeEach
+        void beforeEach() throws NoSuchMethodException {
+            method = TestUtil.getMethod(IPDict4J.class, "rebalanceChildGlueNode", new Class[]{Node.class, Node.class, int.class});
+        }
+
+        @Test @DisplayName("should do nothing if the node has no child nodes")
+        void push_ad44aa3f_2c5d_40bd_a58a_ea4f11dc769a() {
+            //Node<String> root = new Node<>(null, IPDict4J);
+            //Node<String> node = new Node<>("dymmy", 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<Integer, Node<String>>());
+            // method.invoke();
+            // dict.rebalanceChildGlueNode(node, );
+        }
     }
 }

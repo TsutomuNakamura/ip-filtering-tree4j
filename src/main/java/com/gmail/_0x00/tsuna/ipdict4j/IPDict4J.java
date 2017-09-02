@@ -16,7 +16,7 @@ public class IPDict4J <T>
             = Pattern.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
 
-    public static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
+    private static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
 
     private Node<T> root = new Node<>(null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new HashMap<>());
 
@@ -33,21 +33,26 @@ public class IPDict4J <T>
         }
     }
 
-    public IPDict4J push(String ipAddress, int subnetMaskLength, T data) throws Exception {
-        if(!IPV4_REGEX.matcher(ipAddress).matches())
-            throw new Exception("String of IPv4 " + ipAddress + " is invalid");
+    public T delete(String ip) {
+        // TODO:
+        return null;
+    };
+
+    public IPDict4J push(String ip, int subnetMaskLength, T data) throws Exception {
+        if(!IPV4_REGEX.matcher(ip).matches())
+            throw new Exception("String of IPv4 " + ip + " is invalid");
         if(data == null)
             throw new Exception("TODO: Cannot push null as data");
 
         return pushDataToIPv4Tree(
                 root,
                 root.getRefToChildren().get(0),
-                convertIPStringToBinary(ipAddress),
+                convertIPStringToBinary(ip),
                 subnetMaskLength,
                 data);
     }
 
-    public Node<T> getRootNode() {
+    private Node<T> getRootNode() {
         return root.getRefToChildren().get(0);
     }
 
@@ -147,11 +152,52 @@ public class IPDict4J <T>
      * @return result of this method
      * @since 1.8+
      */
-    public boolean hasGlueNodeOnly(Node<T> node) {
+    private boolean hasGlueNodeOnly(Node<T> node) {
         Map<Integer, Node<T>> m = node.getRefToChildren();
         if(m == null || m.isEmpty()) return false;
 
         return !m.entrySet().stream().anyMatch(e -> e.getValue().getData() != null);
+    }
+
+    public void rebalanceChildGlueNode(Node<T> node, Node<T> parentNode, int keyOfCurrentNode) {
+        if(node.getChildSubnetMaskLength() == 32 ||
+                node.getChildSubnetMaskLength() == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED ||
+                hasGlueNodeOnly(node)) {
+            return;
+        }
+
+        Map<Integer, Node<T>> oldChildNodes = node.getRefToChildren();
+        int len                         = IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED;
+        int minimum                     = 32;
+        Map<Integer, Object> variance   = new HashMap<>();
+        boolean doCreate                = false;
+
+        for(Map.Entry<Integer, Node<T>> e : oldChildNodes.entrySet()) {
+            len = e.getValue().getSubnetMaskLength();
+            if(len == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED) continue;
+            variance.put(len, null);
+            if(minimum > len) minimum = len;
+
+            if(node.getSubnetMaskLength() >= (len - 2)) {
+                doCreate = true;
+                break;
+            }
+        }
+
+        if(variance.size() > 1) doCreate = true;
+
+        Node<T> newNode = new Node<>(node.getData(), node.getSubnetMaskLength(), minimum, new HashMap<>());
+
+        for(Map.Entry<Integer, Node<T>> e : oldChildNodes.entrySet()) {
+            if(doCreate && e.getValue().getChildSubnetMaskLength() > minimum) {
+                createGlueNodes(e.getValue(), node, e.getKey(), minimum);
+            }
+            for(Map.Entry<Integer, Node<T>> e2 : e.getValue().getRefToChildren().entrySet()) {
+                newNode.getRefToChildren().put(e2.getKey(), e.getValue().getRefToChildren().get(e2.getKey()));
+            }
+        }
+
+        parentNode.getRefToChildren().put(keyOfCurrentNode, newNode);
     }
 
     /**
