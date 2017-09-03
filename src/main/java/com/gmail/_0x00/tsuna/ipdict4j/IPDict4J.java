@@ -2,6 +2,7 @@ package com.gmail._0x00.tsuna.ipdict4j;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 /**
@@ -144,6 +145,62 @@ public class IPDict4J <T>
         }
 
         return binIPv4;
+    }
+
+    /**
+     * Remove a data in the tree indexed by IPv4 network address.
+     * @param ip IPv4 address string for index.
+     * @param maskLen Length of network address for IPv4 address.
+     */
+    public T delete(String ip, int maskLen) {
+        deleteDataFromTheTree(getRootNode(), root, convertIPStringToBinary(ip), maskLen);
+    }
+
+    /**
+     * Remove a data in the tree indexed by IPv4 network address.
+     * @param node target node that may have the node that will be deleted
+     * @param parentNode parent node of target node
+     * @param ip ip address to the node
+     * @param maskLen subnet mask length to the node that will be deleted
+     */
+    private T deleteDataFromTheTree(Node<T> node, Node<T> parentNode, int ip, int maskLen) {
+        int maskLenOfCurrentNode = node.getSubnetMaskLength();
+        T result;
+        Stack<Backet<T>> stack = new Stack<>();
+        stack.push(new Backet<T>(parentNode, 0));
+
+        while(true) {
+            if(node.getSubnetMaskLength() == maskLen) {
+                result = node.getData();
+                if(result == null) return null;  /* target was not found */
+
+                if(node.getSubnetMaskLength() == 0) {
+                    // Delete root node as glue node
+                    Node<T> newNode = new Node<>(
+                            null, node.getSubnetMaskLength(), node.getSubnetMaskLength(), node.getRefToChildren());
+                    stack.pop().getNode().getRefToChildren().put(0, newNode);  /* put("0.0.0.0", newNode) */
+
+                    return result;
+                }
+
+                // If currentNode is not root one
+                Backet<T> parentNodeBacket = null;
+                Node<T> pNode = null;
+                int netAddrToPNodeChild = -1;
+                while(!stack.empty()) {
+                    parentNodeBacket    = stack.pop();
+                    pNode          = parentNodeBacket.getNode();
+                    netAddrToPNodeChild = parentNodeBacket.getIpv4ToNode();
+
+                    if((pNode.getSubnetMaskLength() != 0) && (pNode.getData() == null && pNode.getRefToChildren().size() == 1)) {
+                        // The parent glue node will be deleted with target node
+                        continue;
+                    }
+
+                    // TODO:
+                }
+            }
+        }
     }
 
     /**
@@ -317,5 +374,33 @@ public class IPDict4J <T>
         //public Node<T> getNodeToRefToChildren(int binaryAddress) {
         //    return this.refToChildren.get(binaryAddress);
         //}
+    }
+
+    static class Backet <T> {
+        /** Node */
+        private Node<T> node;
+        /** IPv4 address to the node */
+        private int ipv4ToNode;
+
+        public Backet(Node<T> node, int ipv4ToNode) {
+            this.node = node;
+            this.ipv4ToNode = ipv4ToNode;
+        }
+
+        public Node<T> getNode() {
+            return node;
+        }
+
+        public int getIpv4ToNode() {
+            return ipv4ToNode;
+        }
+
+        public void setNode(Node<T> node) {
+            this.node = node;
+        }
+
+        public void setIpv4ToNode(int ipv4ToNode) {
+            this.ipv4ToNode = ipv4ToNode;
+        }
     }
 }
