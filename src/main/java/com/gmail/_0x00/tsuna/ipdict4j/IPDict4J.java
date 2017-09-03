@@ -159,10 +159,10 @@ public class IPDict4J <T>
         return !m.entrySet().stream().anyMatch(e -> e.getValue().getData() != null);
     }
 
-    private void rebalanceChildGlueNode(Node<T> node, Node<T> parentNode, int keyOfCurrentNode) {
+    private void rebalanceChildGlueNode(Node<T> node, Node<T> parentNode, int keyToCurrentNode) {
         if(node.getChildSubnetMaskLength() == 32 ||
                 node.getChildSubnetMaskLength() == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED ||
-                hasGlueNodeOnly(node)) {
+                !hasGlueNodeOnly(node)) {
             return;
         }
 
@@ -173,7 +173,7 @@ public class IPDict4J <T>
         boolean doCreate                = false;
 
         for(Map.Entry<Integer, Node<T>> e : oldChildNodes.entrySet()) {
-            len = e.getValue().getSubnetMaskLength();
+            len = e.getValue().getChildSubnetMaskLength();
             if(len == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED) continue;
             variance.put(len, null);
             if(minimum > len) minimum = len;
@@ -197,7 +197,7 @@ public class IPDict4J <T>
             }
         }
 
-        parentNode.getRefToChildren().put(keyOfCurrentNode, newNode);
+        parentNode.getRefToChildren().put(keyToCurrentNode, newNode);
     }
 
     /**
@@ -252,8 +252,14 @@ public class IPDict4J <T>
 
         /**
          * Constructs an empty node.
+         * @param data
+         * @param subnetMaskLength
+         * @param childSubnetMaskLength
          */
-        protected Node() {
+        protected Node(T data, int subnetMaskLength, int childSubnetMaskLength) {
+            this.data = data;
+            this.subnetMaskLength = subnetMaskLength;
+            this.childSubnetMaskLength = childSubnetMaskLength;
             this.refToChildren = new HashMap<>();
         }
 
@@ -266,7 +272,6 @@ public class IPDict4J <T>
          * @param refToChild            referenct to child node
          */
         protected Node(T data, int subnetMaskLength, int childSubnetMaskLength, Map<Integer, Node<T>> refToChild) {
-            this.refToChildren = new HashMap<>();
             this.data = data;
             this.subnetMaskLength = subnetMaskLength;
             this.childSubnetMaskLength = childSubnetMaskLength;
