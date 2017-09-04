@@ -189,7 +189,7 @@ public class IPDict4J <T>
                 int netAddrToPNodeChild = -1;
                 while(!stack.empty()) {
                     parentNodeBacket    = stack.pop();
-                    pNode          = parentNodeBacket.getNode();
+                    pNode               = parentNodeBacket.getNode();
                     netAddrToPNodeChild = parentNodeBacket.getIpv4ToNode();
 
                     if((pNode.getSubnetMaskLength() != 0) && (pNode.getData() == null && pNode.getRefToChildren().size() == 1)) {
@@ -198,6 +198,8 @@ public class IPDict4J <T>
                     }
 
                     // TODO:
+                    parentNode.getRefToChildren().remove(netAddrToPNodeChild);
+
                 }
             }
         }
@@ -366,14 +368,6 @@ public class IPDict4J <T>
         public void setRefToChildren(Map<Integer, Node<T>> refToChildren) {
             this.refToChildren = refToChildren;
         }
-
-        //public void putNodeToRefToChildren(int binaryAddress, Node<T> childNode) {
-        //    this.refToChildren.put(binaryAddress, childNode);
-        //}
-
-        //public Node<T> getNodeToRefToChildren(int binaryAddress) {
-        //    return this.refToChildren.get(binaryAddress);
-        //}
     }
 
     static class Backet <T> {
