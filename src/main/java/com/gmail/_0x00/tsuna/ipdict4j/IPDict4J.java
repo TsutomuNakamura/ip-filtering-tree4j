@@ -163,21 +163,23 @@ public class IPDict4J <T>
      * @param ip ip address to the node
      * @param maskLen subnet mask length to the node that will be deleted
      */
-    private T deleteDataFromTheTree(Node<T> node, Node<T> parentNode, int ip, int maskLen) {
+    private T deleteDataFromTheTree(Node<T> node, Node<T> parentNode, final int ip, final int maskLen) {
+        Node<T> currentNode = node;
+        Node<T> ppNode      = root;
         int maskLenOfCurrentNode = node.getSubnetMaskLength();
         T result;
         Stack<Backet<T>> stack = new Stack<>();
         stack.push(new Backet<T>(parentNode, 0));
 
         while(true) {
-            if(node.getSubnetMaskLength() == maskLen) {
-                result = node.getData();
+            if(currentNode.getSubnetMaskLength() == maskLen) {
+                result = currentNode.getData();
                 if(result == null) return null;  /* target was not found */
 
-                if(node.getSubnetMaskLength() == 0) {
+                if(currentNode.getSubnetMaskLength() == 0) {
                     // Delete root node as glue node
                     Node<T> newNode = new Node<>(
-                            null, node.getSubnetMaskLength(), node.getSubnetMaskLength(), node.getRefToChildren());
+                            null, currentNode.getSubnetMaskLength(), currentNode.getSubnetMaskLength(), currentNode.getRefToChildren());
                     stack.pop().getNode().getRefToChildren().put(0, newNode);  /* put("0.0.0.0", newNode) */
 
                     return result;
@@ -197,10 +199,27 @@ public class IPDict4J <T>
                         continue;
                     }
 
-                    // TODO:
-                    parentNode.getRefToChildren().remove(netAddrToPNodeChild);
-
+                    pNode.getRefToChildren().remove(netAddrToPNodeChild);
+                    if(pNode.getRefToChildren().size() == 0) {
+                        pNode.setChildSubnetMaskLength(SUBNETMASK_LENGTH_IS_UNDEFINED);
+                        if(currentNode.getChildSubnetMaskLength() != SUBNETMASK_LENGTH_IS_UNDEFINED) {
+                            pNode.setRefToChildren(currentNode.getRefToChildren());
+                            pNode.setChildSubnetMaskLength(currentNode.getChildSubnetMaskLength());
+                        }
+                    } else {
+                        // rebalanceChildGlueNode(pNode, );
+                    }
+                    break;
                 }
+                return result;
+            }
+            int childNetAddr = getBinIPv4NetAddr(ip, currentNode.getChildSubnetMaskLength());
+            Node<T> nextNode = currentNode.getRefToChildren().get(childNetAddr);
+            if(nextNode != null) {
+                stack.push(new Backet<>(currentNode, childNetAddr));
+                currentNode = nextNode;
+            } else {
+                return null;  /* Target to delete was not found */
             }
         }
     }
