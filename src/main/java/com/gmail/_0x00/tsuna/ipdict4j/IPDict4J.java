@@ -34,11 +34,6 @@ public class IPDict4J <T>
         }
     }
 
-    public T delete(String ip) {
-        // TODO:
-        return null;
-    };
-
     public IPDict4J push(String ip, int subnetMaskLength, T data) throws Exception {
         if(!IPV4_REGEX.matcher(ip).matches())
             throw new Exception("String of IPv4 " + ip + " is invalid");
@@ -153,7 +148,7 @@ public class IPDict4J <T>
      * @param maskLen Length of network address for IPv4 address.
      */
     public T delete(String ip, int maskLen) {
-        deleteDataFromTheTree(getRootNode(), root, convertIPStringToBinary(ip), maskLen);
+        return deleteDataFromTheTree(getRootNode(), root, convertIPStringToBinary(ip), maskLen);
     }
 
     /**
