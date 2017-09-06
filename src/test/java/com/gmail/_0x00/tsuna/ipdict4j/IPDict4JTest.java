@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.gmail._0x00.tsuna.ipdict4j.IPDict4J.Node;
-import static com.sun.org.glassfish.gmbal.ManagedObjectManagerFactory.getMethod;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
