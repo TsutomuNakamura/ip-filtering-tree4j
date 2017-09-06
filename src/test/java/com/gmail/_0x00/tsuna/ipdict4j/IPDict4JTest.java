@@ -1521,4 +1521,142 @@ public class IPDict4JTest
             assertTheNode(node1, "Data of 172.18.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
     }
+
+    @Nested
+    @DisplayName("delete")
+    class TestDelete {
+        Method method = null;
+        @BeforeEach
+        void beforeEach() throws NoSuchMethodException {
+            method = TestUtil.getMethod(IPDict4J.class, "delete", new Class[]{String.class, int.class});
+        }
+
+        @Test @DisplayName("should delete a root data node")
+        void delete_009cc596_f7b0_4fea_a129_33096672b09c() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+
+            String result = dict.delete("0.0.0.0", 0);
+            assertEquals("Data of 0.0.0.0/0", result);
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, null, 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should delete a single root node")
+        void delete_7ddd3361_f11e_422c_80e8_378662f1019d() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 255.255.128./17(d)      |
+                +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            Node<String> _root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(_root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> _node = _root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+
+            dict.delete("10.0.0.0", 8);
+
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should delete subnet the data that has length of subnetmask 18")
+        void delete_7575d270_cedb_4c0b_9172_6349b3f4d488() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 255.255.128.0/17(d)     |
+                +-+-----------------------+
+                  | delete
+                +-+-----------------------+
+                | 255.255.192.0/18(d)     |
+                +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 255.255.128.0/17(d)     |
+                +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("255.255.128.0", 17, "Data of 255.255.128.0/17");
+            dict.push("255.255.192.0", 18, "Data of 255.255.192.0/18");
+
+            String result = dict.delete("255.255.192.0", 18);
+            assertEquals("Data of 255.255.192.0/18", result);
+
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 17, new String[]{"255.255.128"});
+            node = node.getRefToChildren().get(dict.convertIPStringToBinary("255.255.128.0"));
+            assertTheNode(node, "Data of 255.255.128.0/17", 17, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should delete middle of data that has length of subnetmask 17")
+        void delete_8897fc3f_2010_48e1_b7ef_3b2f0fcf02dd() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  | delete
+                +-+-----------------------+
+                | 255.255.128./17(d)      |
+                +-------------------------+
+                  |
+                +-+-----------------------+
+                | 255.255.192.0/18(d)     |
+                +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 255.255.192.0/18(d)     |
+                +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("255.255.128.0", 17, "Data of 255.255.128.0/17");
+            dict.push("255.255.192.0", 18, "Data of 255.255.192.0/18");
+
+            String result = dict.delete("255.255.128.0", 17);
+            assertEquals("Data of 255.255.128.0/17", result);
+
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 18, new String[]{"255.255.192.0"});
+            node = node.getRefToChildren().get(dict.convertIPStringToBinary("255.255.192.0"));
+            assertTheNode(node, "Data of 255.255.192.0/18", 18, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should delete a single node under the glue node that has 2 node")
+        void delete_688b91f2_6174_40a0_86c0_f98451553979() throws Exception {
+            // TODO:
+        }
+
+    }
 }

@@ -160,7 +160,7 @@ public class IPDict4J <T>
      */
     private T deleteDataFromTheTree(Node<T> node, Node<T> parentNode, final int ip, final int maskLen) {
         Node<T> currentNode = node;
-        Node<T> ppNode      = root;
+        // Node<T> ppNode      = root;
         int maskLenOfCurrentNode = node.getSubnetMaskLength();
         T result;
         Stack<Backet<T>> stack = new Stack<>();
@@ -174,7 +174,7 @@ public class IPDict4J <T>
                 if(currentNode.getSubnetMaskLength() == 0) {
                     // Delete root node as glue node
                     Node<T> newNode = new Node<>(
-                            null, currentNode.getSubnetMaskLength(), currentNode.getSubnetMaskLength(), currentNode.getRefToChildren());
+                            null, currentNode.getSubnetMaskLength(), currentNode.getChildSubnetMaskLength(), currentNode.getRefToChildren());
                     stack.pop().getNode().getRefToChildren().put(0, newNode);  /* put("0.0.0.0", newNode) */
 
                     return result;
@@ -196,13 +196,19 @@ public class IPDict4J <T>
 
                     pNode.getRefToChildren().remove(netAddrToPNodeChild);
                     if(pNode.getRefToChildren().size() == 0) {
+                        // FIXME:
                         pNode.setChildSubnetMaskLength(SUBNETMASK_LENGTH_IS_UNDEFINED);
                         if(currentNode.getChildSubnetMaskLength() != SUBNETMASK_LENGTH_IS_UNDEFINED) {
                             pNode.setRefToChildren(currentNode.getRefToChildren());
                             pNode.setChildSubnetMaskLength(currentNode.getChildSubnetMaskLength());
                         }
                     } else {
-                        // rebalanceChildGlueNode(pNode, );
+                        // if(stack.size() == 0) throw new Exception("Something wrong");
+
+                        Backet<T> b = stack.pop();
+                        Node<T> ppNode = b.getNode();  /* Parent node of parent node */
+                        int keyToChildOfPpnode = b.getIpv4ToNode();
+                        rebalanceChildGlueNode(pNode, ppNode, keyToChildOfPpnode);
                     }
                     break;
                 }
