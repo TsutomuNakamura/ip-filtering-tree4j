@@ -20,7 +20,7 @@ public class IPDict4JTest
     private IPDict4J<String> dict;
     private int SUBNETMASK_LENGTH_IS_UNDEFINED;
 
-    public <E> void assertTheNode(Node<E> node, E data, int subnetMaskLength, int childSubnetMaskLength, String[] indexesOfChildNodes) {
+    public <E> void assertTheNode(Node<String> node, java.lang.String data, int subnetMaskLength, int childSubnetMaskLength, String[] indexesOfChildNodes) {
         if(indexesOfChildNodes == null) indexesOfChildNodes = new String[0];
         assertEquals(data, node.getData());
         assertEquals(subnetMaskLength, node.getSubnetMaskLength());
@@ -1901,7 +1901,456 @@ public class IPDict4JTest
             node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.2.0"));
             assertTheNode(node2, "Data of 172.16.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
-        @Test @DisplayName("")
-        void delete_0985d4fe_fe29_4fc3_a861_b6ab818467e6() throws Exception {
+        @Test @DisplayName("should delete a single data node under 1 glue node that has 1 child node")
+        void delete_868209d5_6582_4d1d_8820_7476a8772ac2() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(d)          |
+                +-+-----------------------+ +-------------------------+
+                  |                           | delete
+                +-+-----------------------+ +-+-----------------------+
+                | 10.1.0.0/16(d)          | | 172.16.0.0/16(d)        |
+                +-+-----------------------+ +-------------------------+
+                                              |
+                                              +---------------------------+
+                                              |                           |
+                                            +-+-----------------------+ +-+-----------------------+
+                                            | 172.16.1.0/24(d)        | | 172.16.2.0/24(d)        |
+                                            +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(d)          |
+                +-+-----------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+   |
+                | 10.1.0.0/16(d)          |   |
+                +-+-----------------------+   |
+                                              |
+                                              +---------------------------+
+                                              |                           |
+                                            +-+-----------------------+ +-+-----------------------+
+                                            | 172.16.1.0/24(d)        | | 172.16.2.0/24(d)        |
+                                            +-------------------------+ +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("10.1.0.0", 16, "Data of 10.1.0.0/16");
+            dict.push("172.0.0.0", 8, "Data of 172.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("172.16.1.0", 24, "Data of 172.16.1.0/24");
+            dict.push("172.16.2.0", 24, "Data of 172.16.2.0/24");
+            String result = dict.delete("172.16.0.0", 16);
+
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"10.0.0.0", "172.0.0.0"});
+            Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, 16, new String[]{"10.1.0.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("10.1.0.0"));
+            assertTheNode(node1, "Data of 10.1.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
+            assertTheNode(node1, "Data of 172.0.0.0/8", 8, 24, new String[]{"172.16.1.0", "172.16.2.0"});
+            Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.1.0"));
+            assertTheNode(node2, "Data of 172.16.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.2.0"));
+            assertTheNode(node2, "Data of 172.16.2.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should delete a single data node with parent glue node")
+        void delete_6385115d_55a0_4e4d_ac1a_e616b8e60e45() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(g)          |
+                +-+-----------------------+ +-------------------------+
+                                              | delete
+                                            +-+-----------------------+
+                                            | 172.16.0.0/16(d)        |
+                                            +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 10.0.0.0/8(d)           |
+                +-+-----------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            String result = dict.delete("172.16.0.0", 16);
+
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"10.0.0.0"});
+            node = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+            assertTheNode(node, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should delete a single data node with rebalancing glue node")
+        void delete_9ade7c89_a5f5_4193_a80f_b4dc3b920842() throws Exception {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  | delete                    |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(g)          |
+                +-------------------------+ +-------------------------+
+                                              |
+                                            +-+-----------------------+
+                                            | 172.16.0.0/16(d)        |
+                                            +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 172.16.0.0/16(d)        |
+                +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            String result = dict.delete("10.0.0.0", 8);
+            assertEquals("Data of 10.0.0.0/8", result);
+
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 16, new String[]{"172.16.0.0"});
+            node = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
+            assertTheNode(node, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+        @Test @DisplayName("should pass integration test")
+        void delete_9cd90997_38e8_4153_865d_dee944b4e221() throws Exception {
+             /*
+                 1) delete
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +-----------------------------------------------------------------------------------+---------------------------+
+                  |                                                                                   |                           |
+                +-------------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                                                         | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                                                         +-+-----------------------+ +-------------------------+
+                  |                                                                                   |
+                  +---------------------------+---------------------------+                           |
+                  |                           |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +-----------------------------------------------------------------------------------+---------------------------+
+                  |                                                                                   |                           | 2) delete
+                +-------------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                                                         | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                  |                                                                                   |
+                  +---------------------------+---------------------------+                           |
+                  |                           |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+---------------------------+---------------------------+
+                  |                           |                           |                           | 3) delete
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-+-----------------------+ +-+-----------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+---------------------------+
+                  |                           |                           | 4) delete
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       |
+                +-+-----------------------+ +-+-----------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > add 0.0.0.0/0 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > add 10.0.0.0/8 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-------------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+ +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > add 172.16.0.0/16 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +-------------------------------------------------------+---------------------------+
+                  |                                                       |                           |
+                +-------------------------+                             +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                             +-+-----------------------+ +-------------------------+
+                  |                                                       |
+                  +---------------------------+                           |
+                  |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-+-----------------------+
+                > add 192.170.0.0/16 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +-----------------------------------------------------------------------------------+---------------------------+
+                  |                                                                                   |                           |
+                +-------------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                                                         | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                                                         +-+-----------------------+ +-------------------------+
+                  |                                                                                   |
+                  +---------------------------+---------------------------+                           |
+                  |                           |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.170.0.0", 16, "Data of 192.170.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            // ---------------------------------------------------------
+            assertEquals("Data of 0.0.0.0/0", dict.delete("0.0.0.0", 0));
+            Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, null, 0, 8, new String[]{"192.0.0.0", "172.0.0.0", "10.0.0.0"});
+            Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.0.0.0"));
+            assertTheNode(node1, null, 8, 16, new String[]{"192.168.0.0", "192.169.0.0", "192.170.0.0"});
+            Node<String> node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
+            assertTheNode(node2, null, 16, 24, new String[]{"192.168.1.0"});
+            node2 = node2.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
+            assertTheNode(node2, null, 16, 24, new String[]{"192.169.1.0"});
+            node2 = node2.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.170.0.0"));
+            assertTheNode(node2, "Data of 192.170.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
+            assertTheNode(node1, null, 8, 16, new String[]{"172.16.0.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // ---------------------------------------------------------
+            assertEquals("Data of 10.0.0.0/8", dict.delete("10.0.0.0", 8));
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, null, 0, 16, new String[]{"192.168.0.0", "192.169.0.0", "192.170.0.0", "172.16.0.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
+            assertTheNode(node1, null, 16, 24, new String[]{"192.168.1.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node1, "Data of 192.168.1.0/24",24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
+            assertTheNode(node1, null, 16, 24, new String[]{"192.169.1.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.170.0.0"));
+            assertTheNode(node1, "Data of 192.170.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // --------------------------------------------------------------
+            assertEquals("Data of 172.16.0.0/16", dict.delete("172.16.0.0", 16));
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, null, 0, 16, new String[]{"192.168.0.0", "192.169.0.0", "192.170.0.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
+            assertTheNode(node1, null, 16, 24, new String[]{"192.168.1.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
+            assertTheNode(node1, null, 16, 24, new String[]{"192.169.1.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // --------------------------------------------------------------
+            assertEquals("Data of 192.170.0.0/16", dict.delete("192.170.0.0", 16));
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, null, 0, 24, new String[]{"192.168.1.0", "192.169.1.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // --------------------------------------------------------------
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 24, new String[]{"192.168.1.0", "192.169.1.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // --------------------------------------------------------------
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"192.0.0.0", "10.0.0.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.0.0.0"));
+            assertTheNode(node1, null, 8, 24, new String[]{"192.168.1.0", "192.169.1.0"});
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // ---------------------------------------------------------
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"192.0.0.0", "172.0.0.0", "10.0.0.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.0.0.0"));
+            assertTheNode(node1, null, 8, 24, new String[]{"192.168.1.0", "192.169.1.0"});
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
+            assertTheNode(node1, null, 8, 16, new String[]{"172.16.0.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            // ---------------------------------------------------------
+            dict.push("192.170.0.0", 16, "Data of 192.170.0.0/16");
+            root = (Node<String>) TestUtil.getInstanceField(dict, "root");
+            assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
+            node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"192.0.0.0", "172.0.0.0", "10.0.0.0"});
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.0.0.0"));
+            assertTheNode(node1, null, 8, 16, new String[]{"192.168.0.0", "192.169.0.0", "192.170.0.0"});
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.168.0.0"));
+            assertTheNode(node2, null, 16, 24, new String[]{"192.168.1.0"});
+            node2 = node2.getRefToChildren().get(dict.convertIPStringToBinary("192.168.1.0"));
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.169.0.0"));
+            assertTheNode(node2, null, 16, 24, new String[]{"192.169.1.0"});
+            node2 = node2.getRefToChildren().get(dict.convertIPStringToBinary("192.169.1.0"));
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node2 = node1.getRefToChildren().get(dict.convertIPStringToBinary("192.170.0.0"));
+            assertTheNode(node2, "Data of 192.170.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
+            assertTheNode(node1, null, 8, 16, new String[]{"172.16.0.0"});
+            node1 = node1.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+
+            node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
+        }
+
     }
 }
