@@ -163,8 +163,8 @@ public class IPDict4J <T>
         // Node<T> ppNode      = root;
         int maskLenOfCurrentNode = node.getSubnetMaskLength();
         T result;
-        Stack<Backet<T>> stack = new Stack<>();
-        stack.push(new Backet<T>(parentNode, 0));
+        Stack<Bucket<T>> stack = new Stack<>();
+        stack.push(new Bucket<T>(parentNode, 0));
 
         while(true) {
             if(currentNode.getSubnetMaskLength() == maskLen) {
@@ -181,13 +181,13 @@ public class IPDict4J <T>
                 }
 
                 // If currentNode is not root one
-                Backet<T> parentNodeBacket = null;
+                Bucket<T> parentNodeBucket = null;
                 Node<T> pNode = null;
                 int netAddrToPNodeChild = -1;
                 while(!stack.empty()) {
-                    parentNodeBacket    = stack.pop();
-                    pNode               = parentNodeBacket.getNode();
-                    netAddrToPNodeChild = parentNodeBacket.getIpv4ToNode();
+                    parentNodeBucket    = stack.pop();
+                    pNode               = parentNodeBucket.getNode();
+                    netAddrToPNodeChild = parentNodeBucket.getIpv4ToNode();
 
                     if((pNode.getSubnetMaskLength() != 0) && (pNode.getData() == null && pNode.getRefToChildren().size() == 1)) {
                         // The parent glue node will be deleted with target node
@@ -205,7 +205,7 @@ public class IPDict4J <T>
                     } else {
                         // if(stack.size() == 0) throw new Exception("Something wrong");
 
-                        Backet<T> b = stack.pop();
+                        Bucket<T> b = stack.pop();
                         Node<T> ppNode = b.getNode();  /* Parent node of parent node */
                         int keyToChildOfPpnode = b.getIpv4ToNode();
                         rebalanceChildGlueNode(pNode, ppNode, keyToChildOfPpnode);
@@ -217,7 +217,7 @@ public class IPDict4J <T>
             int childNetAddr = getBinIPv4NetAddr(ip, currentNode.getChildSubnetMaskLength());
             Node<T> nextNode = currentNode.getRefToChildren().get(childNetAddr);
             if(nextNode != null) {
-                stack.push(new Backet<>(currentNode, childNetAddr));
+                stack.push(new Bucket<>(currentNode, childNetAddr));
                 currentNode = nextNode;
             } else {
                 return null;  /* Target to delete was not found */
@@ -390,13 +390,13 @@ public class IPDict4J <T>
         }
     }
 
-    static class Backet <T> {
+    static class Bucket <T> {
         /** Node */
         private Node<T> node;
         /** IPv4 address to the node */
         private int ipv4ToNode;
 
-        public Backet(Node<T> node, int ipv4ToNode) {
+        public Bucket(Node<T> node, int ipv4ToNode) {
             this.node = node;
             this.ipv4ToNode = ipv4ToNode;
         }
