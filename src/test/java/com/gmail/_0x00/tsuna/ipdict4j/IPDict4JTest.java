@@ -1525,11 +1525,6 @@ public class IPDict4JTest
     @Nested
     @DisplayName("delete")
     class TestDelete {
-        Method method = null;
-        @BeforeEach
-        void beforeEach() throws NoSuchMethodException {
-            method = TestUtil.getMethod(IPDict4J.class, "delete", new Class[]{String.class, int.class});
-        }
 
         @Test @DisplayName("should delete a root data node")
         void delete_009cc596_f7b0_4fea_a129_33096672b09c() throws Exception {
@@ -2351,6 +2346,60 @@ public class IPDict4JTest
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("10.0.0.0"));
             assertTheNode(node1, "Data of 10.0.0.0/8", 8, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
+    }
 
+    @Nested
+    @DisplayName("find")
+    class TestFind {
+        @Test @DisplayName("should return root node if existed")
+        void find_c6b6ee83_565c_4216_9728_19ab8b75351f() throws Exception {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            assertEquals("Data of 0.0.0.0/0", dict.find("0.0.0.0"));
+        }
+        @Test @DisplayName("should return undefined if no data has been registered")
+        void find_5741f4e5_e448_4744_974f_c9c31eb1327b() throws Exception {
+            assertEquals(null, dict.find("0.0.0.0"));
+            assertEquals(null, dict.find("192.168.1.10"));
+            assertEquals(null, dict.find("172.16.0.1"));
+        }
+        @Test @DisplayName("should return data if data has been registered in key 0.0.0.0/0")
+        void find_b3956a19_6420_41bf_8852_4578327dca86() throws Exception {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            assertEquals("Data of 0.0.0.0/0", dict.find("0.0.0.0"));
+            assertEquals("Data of 0.0.0.0/0", dict.find("10.0.0.1"));
+            assertEquals("Data of 0.0.0.0/0", dict.find("172.16.0.1"));
+            assertEquals("Data of 0.0.0.0/0", dict.find("192.168.1.1"));
+        }
+        @Test @DisplayName("should return data for 0.0.0.0/0, 192.168.1.0/24")
+        void find_d9e79d2f_0fa8_400f_95f7_82d2381b600c() throws Exception {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+
+            assertEquals("Data of 0.0.0.0/0", dict.find("0.0.0.0"));
+            assertEquals("Data of 0.0.0.0/0", dict.find("10.0.0.1"));
+            assertEquals("Data of 0.0.0.0/0", dict.find("172.16.0.1"));
+            assertEquals("Data of 192.168.1.0/24", dict.find("192.168.1.1"));
+        }
+        @Test @DisplayName("should return data for 0.0.0.0/0, 10.0.0.0/8, 172.16.0.0/16, 192.168.1.0/24")
+        void find_44563f98_0a3e_409b_8631_b427b28c052b() throws Exception {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.1", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.1", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            assertEquals("Data of 0.0.0.0/0", dict.find("0.0.0.0"));
+            assertEquals("Data of 10.0.0.0/8", dict.find("10.0.0.1"));
+            assertEquals("Data of 172.16.0.0/16", dict.find("172.16.0.1"));
+            assertEquals("Data of 192.168.1.0/24", dict.find("192.168.1.1"));
+        }
+        @Test @DisplayName("should return undefined(data of 0.0.0.0/0) if data which appropriate is not found")
+        void find_6cacb875_6b95_4eea_8e71_6cd3aab5b989() throws Exception {
+            dict.push("10.0.0.1", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.1", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            assertEquals(null, dict.find("0.0.0.0"));
+            assertEquals(null, dict.find("11.0.0.1"));
+            assertEquals(null, dict.find("172.17.0.1"));
+            assertEquals(null, dict.find("192.168.2.1"));
+        }
     }
 }

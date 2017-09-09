@@ -143,6 +143,33 @@ public class IPDict4J <T>
     }
 
     /**
+     * Find the data from ip address
+     * @param ip the ip address to find the data
+     * @return data or null.
+     */
+    public T find(String ip) {
+        int keyIp = convertIPStringToBinary(ip);
+        int netAddress;
+        Node<T> currentNode = root.getRefToChildren().get(0);
+        Node<T> nextNode;
+        T result = currentNode.getData();
+
+        while(currentNode.getChildSubnetMaskLength() != SUBNETMASK_LENGTH_IS_UNDEFINED) {
+            netAddress = getBinIPv4NetAddr(keyIp, currentNode.getChildSubnetMaskLength());
+            if((nextNode = currentNode.getRefToChildren().get(netAddress)) != null) {
+                if(nextNode.getData() != null) {
+                    result = nextNode.getData();
+                }
+                currentNode = nextNode;
+            } else {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Remove a data in the tree indexed by IPv4 network address.
      * @param ip IPv4 address string for index.
      * @param maskLen Length of network address for IPv4 address.
@@ -164,7 +191,7 @@ public class IPDict4J <T>
         int maskLenOfCurrentNode = node.getSubnetMaskLength();
         T result;
         Stack<Bucket<T>> stack = new Stack<>();
-        stack.push(new Bucket<T>(parentNode, 0));
+        stack.push(new Bucket<>(parentNode, 0));
 
         while(true) {
             if(currentNode.getSubnetMaskLength() == maskLen) {
@@ -181,9 +208,9 @@ public class IPDict4J <T>
                 }
 
                 // If currentNode is not root one
-                Bucket<T> parentNodeBucket = null;
-                Node<T> pNode = null;
-                int netAddrToPNodeChild = -1;
+                Bucket<T> parentNodeBucket;
+                Node<T> pNode;
+                int netAddrToPNodeChild;
                 while(!stack.empty()) {
                     parentNodeBucket    = stack.pop();
                     pNode               = parentNodeBucket.getNode();
