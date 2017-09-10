@@ -40,6 +40,7 @@ public class IPDict4J <T>
         if(data == null)
             throw new Exception("TODO: Cannot push null as data");
 
+        /* FIXME: */
         return pushDataToIPv4Tree(
                 root,
                 root.getRefToChildren().get(0),
@@ -92,7 +93,7 @@ public class IPDict4J <T>
                 if(currentNode.getChildSubnetMaskLength() > subnetMaskLength) {
                     // Create glue node then check the glue node's network address
                     // If data node was already existed, createGlueNodes does nothing then continues then throws error.
-                    createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength);
+                    createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength); /* FIXME: */
                     currentNode = parentNode.getRefToChildren().get(lastNetworkAddress);
                 } else if(currentNode.getChildSubnetMaskLength() < subnetMaskLength) {
                     // continue then new node will be appended
@@ -106,7 +107,7 @@ public class IPDict4J <T>
                     parentNode          = currentNode;
                     currentNode         = currentNode.getRefToChildren().get(childNetworkAddress);
                     lastNetworkAddress  = getBinIPv4NetAddr(ipv4, currentNode.getSubnetMaskLength());
-                    continue;
+                    // continue;
                 } else {  /* currentNode.getChildSubnetMaskLength() == subnetMaskLength */
                     if(currentNode.getRefToChildren().get(ipv4) == null) {
                         currentNode.getRefToChildren().put(
@@ -115,7 +116,7 @@ public class IPDict4J <T>
                     }
                     parentNode = currentNode;
                     currentNode = currentNode.getRefToChildren().get(ipv4);
-                    continue;
+                    // continue;
                 }
             } else {
                 // unreachable
@@ -342,6 +343,41 @@ public class IPDict4J <T>
                 = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, rootOfGlueNodes);
         parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
     }
+
+//    private void createGlueNodes(Node<T> currentNode, Node<T> parentNode, int netAddrToCurrent, int subnetMaskLength) {
+//        Map<Integer, Node<T>> childNodes        = currentNode.getRefToChildren();
+//        //Map<Integer, Node<T>> rootOfGlueNodes   = new HashMap<>();
+//        Node<T> parentOfNewGlueNodes = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, new HashMap<>());
+//
+//        for(Map.Entry<Integer, Node<T>> e : childNodes.entrySet()) {
+//            int netAddress = getBinIPv4NetAddr(e.getKey(), subnetMaskLength);
+//
+//            // --------------------------------------------------------
+//            // if(rootOfGlueNodes.get(netAddress) == null) {
+//            //     rootOfGlueNodes.put(
+//            //             netAddress,
+//            //             new Node<>(null, subnetMaskLength, currentNode.getChildSubnetMaskLength(), new HashMap<>()));
+//            // }
+//            // rootOfGlueNodes.get(netAddress).getRefToChildren().put( e.getKey(), childNodes.get(e.getKey()) );
+//            // //rootOfGlueNodes.get(netAddress).getRefToChildren().put(e.getKey(), e.getValue());
+//            // rebalanceChildGlueNode(rootOfGlueNodes.get(netAddress));
+//            // --------------------------------------------------------
+//
+//            if(parentOfNewGlueNodes.getRefToChildren().get(netAddress) == null) {
+//                parentOfNewGlueNodes.getRefToChildren().put(
+//                        netAddress,
+//                        new Node<>(null, subnetMaskLength, currentNode.getChildSubnetMaskLength(), new HashMap<>())
+//                );
+//            }
+//            parentOfNewGlueNodes.getRefToChildren().get(netAddress).getRefToChildren().put(e.getKey(), childNodes.get(e.getKey()));
+//            rebalanceChildGlueNode(parentOfNewGlueNodes.getRefToChildren().get(netAddress), parentOfNewGlueNodes, netAddress);  /* FIXME: Is childNodes wrong state?  */
+//        }
+//
+//        //Node<T> newCurrentNode
+//        //        = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, rootOfGlueNodes);
+//        //parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
+//        parentNode.getRefToChildren().put(netAddrToCurrent, parentOfNewGlueNodes);
+//    }
 
     /**
      * Class Node is the node of the ipdict tree.
