@@ -34,13 +34,20 @@ public class IPDict4J <T>
         }
     }
 
+    /**
+     * Push a data indexed by IPv4 address in the tree databaase
+     * @param ip IPv4 address string for index
+     * @param subnetMaskLength Length of network address for IPv4 address
+     * @param data Data
+     * @return instance of IPDict4J
+     * @throws Exception
+     */
     public IPDict4J push(String ip, int subnetMaskLength, T data) throws Exception {
         if(!IPV4_REGEX.matcher(ip).matches())
             throw new Exception("String of IPv4 " + ip + " is invalid");
         if(data == null)
-            throw new Exception("TODO: Cannot push null as data");
+            throw new Exception("Cannot push null as data");  /* TODO: */
 
-        /* FIXME: */
         return pushDataToIPv4Tree(
                 root,
                 root.getRefToChildren().get(0),
@@ -71,6 +78,13 @@ public class IPDict4J <T>
                 parentNode.getRefToChildren().put(
                         networkAddress,
                         new Node<>(data, subnetMaskLength, currentNode.getChildSubnetMaskLength(), currentNode.getRefToChildren()));
+
+                for(Map.Entry<Integer, Node<T>> e: parentNode.getRefToChildren().entrySet()) {
+                    if(hasGlueNodeOnly(e.getValue())) {
+                        rebalanceChildGlueNode(e.getValue(), parentNode, e.getKey());
+                    }
+                }
+
                 break;
             } else if(subnetLengthOfCurrentNode < subnetMaskLength) {
 
@@ -94,15 +108,6 @@ public class IPDict4J <T>
                     // Create glue node then check the glue node's network address
                     // If data node was already existed, createGlueNodes does nothing then continues then throws error.
                     createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength); /* FIXME: */
-
-                    // TODO:
-                    for(Map.Entry<Integer, Node<T>> e: currentNode.getRefToChildren().entrySet()) {
-                        System.out.println("key: " +  e.getKey() + ", value: " + e.getValue());
-                        if(hasGlueNodeOnly(currentNode)) {
-                            rebalanceChildGlueNode(currentNode, parentNode, lastNetworkAddress);
-                        }
-                    }
-
                     currentNode = parentNode.getRefToChildren().get(lastNetworkAddress);
                 } else if(currentNode.getChildSubnetMaskLength() < subnetMaskLength) {
                     // continue then new node will be appended
@@ -116,7 +121,7 @@ public class IPDict4J <T>
                     parentNode          = currentNode;
                     currentNode         = currentNode.getRefToChildren().get(childNetworkAddress);
                     lastNetworkAddress  = getBinIPv4NetAddr(ipv4, currentNode.getSubnetMaskLength());
-                    // continue;
+                    /* continue; */
                 } else {  /* currentNode.getChildSubnetMaskLength() == subnetMaskLength */
                     if(currentNode.getRefToChildren().get(ipv4) == null) {
                         currentNode.getRefToChildren().put(
@@ -125,7 +130,7 @@ public class IPDict4J <T>
                     }
                     parentNode = currentNode;
                     currentNode = currentNode.getRefToChildren().get(ipv4);
-                    // continue;
+                    /* continue; */
                 }
             } else {
                 // unreachable

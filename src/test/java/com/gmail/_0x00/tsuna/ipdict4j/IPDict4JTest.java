@@ -2714,8 +2714,8 @@ public class IPDict4JTest
                 +-------------------------+ +-------------------------+
             */
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.push("192.168.1.0", 32, "Data of 192.18.1.0/32");
-            dict.push("192.168.2.0", 32, "Data of 192.18.2.0/32");
+            dict.push("192.168.1.0", 32, "Data of 192.168.1.0/32");
+            dict.push("192.168.2.0", 32, "Data of 192.168.2.0/32");
             dict.push("172.16.8.0", 24, "Data of 172.16.8.0/24");
 
             Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
@@ -2757,7 +2757,6 @@ public class IPDict4JTest
             assertTheNode(node1, "Data of 172.16.8.0/24", 24, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
 
             // > delete 172.16.8.0/24 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            // TODO:
             assertEquals("Data of 172.16.8.0/24", dict.delete("172.16.8.0", 24));
             root = (Node<String>) TestUtil.getInstanceField(dict, "root");
             assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
