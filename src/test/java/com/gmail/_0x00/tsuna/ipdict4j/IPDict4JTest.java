@@ -84,6 +84,43 @@ public class IPDict4JTest
     }
 
     @Nested
+    @DisplayName("stringifyFromBinIPv4")
+    class TestStringifyFromBinIPv4 {
+        @Test @DisplayName("should stringify 0 to \"0.0.0.0\"")
+        void stringifyFromBinIPv4_ac098aa1_bd60_42fc_b02b_1d56e955bef1() {
+            assertEquals("0.0.0.0", dict.stringifyFromBinIPv4(0));
+        }
+        @Test @DisplayName("should stringify -1 to \"255.255.255.255\"")
+        void stringifyFromBinIPv4_ccedfc9b_0077_49cd_80f1_1dc44a318fc3() {
+            assertEquals("255.255.255.255", dict.stringifyFromBinIPv4(-1));
+        }
+        @Test @DisplayName("should stringify -256 to \"255.255.255.0\"")
+        void stringifyFromBinIPv4_d6dfedc6_bc1a_4f68_b993_2e20960ba3b8() {
+            assertEquals("255.255.255.0", dict.stringifyFromBinIPv4(-256));
+        }
+        @Test @DisplayName("should stringify -65536 to \"255.255.0.0\"")
+        void stringifyFromBinIPv4_d3f75a2a_6dc4_4e92_b0e4_72f896a1f18b() {
+            assertEquals("255.255.0.0", dict.stringifyFromBinIPv4(-65536));
+        }
+        @Test @DisplayName("should stringify -16777216 to \"255.0.0.0\"")
+        void stringifyFromBinIPv4_ed09c15c_99ea_41b7_b912_3c49f4aeaebb() {
+            assertEquals("255.0.0.0", dict.stringifyFromBinIPv4(-16777216));
+        }
+        @Test @DisplayName("should stringify -1062731520 to \"192.168.1.0\"")
+        void stringifyFromBinIPv4_5591a299_06aa_4b97_9a11_340ff306e302() {
+            assertEquals("192.168.1.0", dict.stringifyFromBinIPv4(-1062731520));
+        }
+        @Test @DisplayName("should stringify -1408237568 to \"172.16.0.0\"")
+        void stringifyFromBinIPv4_f3dbfc4c_7d41_49ac_b486_0a05ef2a69bb() {
+            assertEquals("172.16.0.0", dict.stringifyFromBinIPv4(-1408237568));
+        }
+        @Test @DisplayName("should stringify 167772160 to \"10.0.0.0\"")
+        void stringifyFromBinIPv4_ca563040_2d5e_41c1_afb5_2f35b589c560() {
+            assertEquals("10.0.0.0", dict.stringifyFromBinIPv4(167772160));
+        }
+    }
+
+    @Nested
     @DisplayName("hasGlueNodeOnly")
     class TestHasGlueNodeOnly {
         Node<String> n;

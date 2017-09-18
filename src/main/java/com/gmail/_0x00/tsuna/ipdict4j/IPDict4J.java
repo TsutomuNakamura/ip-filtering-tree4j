@@ -94,6 +94,15 @@ public class IPDict4J <T>
                     // Create glue node then check the glue node's network address
                     // If data node was already existed, createGlueNodes does nothing then continues then throws error.
                     createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength); /* FIXME: */
+
+                    // TODO:
+                    for(Map.Entry<Integer, Node<T>> e: currentNode.getRefToChildren().entrySet()) {
+                        System.out.println("key: " +  e.getKey() + ", value: " + e.getValue());
+                        if(hasGlueNodeOnly(currentNode)) {
+                            rebalanceChildGlueNode(currentNode, parentNode, lastNetworkAddress);
+                        }
+                    }
+
                     currentNode = parentNode.getRefToChildren().get(lastNetworkAddress);
                 } else if(currentNode.getChildSubnetMaskLength() < subnetMaskLength) {
                     // continue then new node will be appended
@@ -134,6 +143,7 @@ public class IPDict4J <T>
      */
     public int convertIPStringToBinary(String ip) {
         int binIPv4 = 0;
+
         String[] ipv4Str = ip.split(IPV4_DELEMITOR);
 
         for(int i = 0; i < ipv4Str.length; ++i) {
@@ -141,6 +151,22 @@ public class IPDict4J <T>
         }
 
         return binIPv4;
+    }
+
+    public String stringifyFromBinIPv4(int ip) {
+        int copyIp = ip;
+        int mask = 255;
+        String result = "";;
+
+        for(int i = 0; i < 4; ++i) {
+            result = (copyIp & mask) + result;
+            if(i < 3) {
+                result = "." + result;
+                copyIp >>>= 8;
+            }
+        }
+
+        return result;
     }
 
     /**
