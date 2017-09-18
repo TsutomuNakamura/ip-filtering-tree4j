@@ -153,6 +153,11 @@ public class IPDict4J <T>
         return binIPv4;
     }
 
+    /**
+     * Stringify binary IPv4 address.
+     * @param ip binary IP address
+     * @return result
+     */
     public String stringifyFromBinIPv4(int ip) {
         int copyIp = ip;
         int mask = 255;
