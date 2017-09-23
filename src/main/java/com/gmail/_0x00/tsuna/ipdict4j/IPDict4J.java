@@ -1,13 +1,8 @@
 package com.gmail._0x00.tsuna.ipdict4j;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.InetAddressValidator;
-
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 /**
  * Hello world!
@@ -16,11 +11,6 @@ import java.util.regex.Pattern;
 public class IPDict4J <T>
 {
     private static final String IPV4_DELEMITOR = "\\.";
-
-    private static final Pattern IPV4_REGEX
-            = Pattern.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
-
-    private static final InetAddressValidator VALIDATOR = new InetAddressValidator();
 
     private static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
 
@@ -407,41 +397,6 @@ public class IPDict4J <T>
                 = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, rootOfGlueNodes);
         parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
     }
-
-//    private void createGlueNodes(Node<T> currentNode, Node<T> parentNode, int netAddrToCurrent, int subnetMaskLength) {
-//        Map<Integer, Node<T>> childNodes        = currentNode.getRefToChildren();
-//        //Map<Integer, Node<T>> rootOfGlueNodes   = new HashMap<>();
-//        Node<T> parentOfNewGlueNodes = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, new HashMap<>());
-//
-//        for(Map.Entry<Integer, Node<T>> e : childNodes.entrySet()) {
-//            int netAddress = getBinIPv4NetAddr(e.getKey(), subnetMaskLength);
-//
-//            // --------------------------------------------------------
-//            // if(rootOfGlueNodes.get(netAddress) == null) {
-//            //     rootOfGlueNodes.put(
-//            //             netAddress,
-//            //             new Node<>(null, subnetMaskLength, currentNode.getChildSubnetMaskLength(), new HashMap<>()));
-//            // }
-//            // rootOfGlueNodes.get(netAddress).getRefToChildren().put( e.getKey(), childNodes.get(e.getKey()) );
-//            // //rootOfGlueNodes.get(netAddress).getRefToChildren().put(e.getKey(), e.getValue());
-//            // rebalanceChildGlueNode(rootOfGlueNodes.get(netAddress));
-//            // --------------------------------------------------------
-//
-//            if(parentOfNewGlueNodes.getRefToChildren().get(netAddress) == null) {
-//                parentOfNewGlueNodes.getRefToChildren().put(
-//                        netAddress,
-//                        new Node<>(null, subnetMaskLength, currentNode.getChildSubnetMaskLength(), new HashMap<>())
-//                );
-//            }
-//            parentOfNewGlueNodes.getRefToChildren().get(netAddress).getRefToChildren().put(e.getKey(), childNodes.get(e.getKey()));
-//            rebalanceChildGlueNode(parentOfNewGlueNodes.getRefToChildren().get(netAddress), parentOfNewGlueNodes, netAddress);  /* FIXME: Is childNodes wrong state?  */
-//        }
-//
-//        //Node<T> newCurrentNode
-//        //        = new Node<>(currentNode.getData(), currentNode.getSubnetMaskLength(), subnetMaskLength, rootOfGlueNodes);
-//        //parentNode.getRefToChildren().put(netAddrToCurrent, newCurrentNode);
-//        parentNode.getRefToChildren().put(netAddrToCurrent, parentOfNewGlueNodes);
-//    }
 
     /**
      * Class Node is the node of the ipdict tree.
