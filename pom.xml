@@ -58,6 +58,26 @@
       <version>3.6.2</version>
     </dependency>
 
+    <!-- TODO: test -->
+    <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator/1.6 -->
+    <!--
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.6</version>
+    </dependency>
+    -->
+
+    <!-- TODO: test -->
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3/3.6 -->
+    <!--
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.6</version>
+    </dependency>
+    -->
+
   </dependencies>
   <build>
     <resources>

@@ -81,6 +81,22 @@ public class IPDict4JTest
         void convertIPStringToBinary_ed713a45_99e5_4cb8_8de1_d4ac0e300402() {
             assertEquals(167772160, dict.convertIPStringToBinary("10.0.0.0"));
         }
+
+        @Test @Disabled @DisplayName("should convert IPs faster")
+        void convertIPStringToBinary_6f791c80_3c47_4a42_9c19_b5e69fcdbc63() {
+            long start = System.currentTimeMillis();
+            String dot = ".";
+            String prefix = "192.";
+            for(int i = 0; i < 256; ++i) {
+                for(int j = 0; j < 256; ++j) {
+                    for(int k = 0; k < 256; ++k) {
+                        StringBuilder ip = new StringBuilder();
+                        dict.convertIPStringToBinary(ip.append(prefix).append(i).append(dot).append(j).append(dot).append(k).toString());
+                    }
+                }
+            }
+            System.out.println("Elapsed time: " + (System.currentTimeMillis() - start) + " ms");
+        }
     }
 
     @Nested
@@ -1752,7 +1768,7 @@ public class IPDict4JTest
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
             method.invoke(dict, node1, node, dict.convertIPStringToBinary("172.0.0.0"));
 
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"172.0.0.0.0"});
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, new String[]{"172.0.0.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("172.0.0.0"));
             assertTheNode(node, "Data of 172.0.0.0/8", 8, 24, new String[]{"172.16.1.0", "172.17.1.0", "172.18.1.0"});
             node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.1.0"));
@@ -1884,7 +1900,7 @@ public class IPDict4JTest
             Node<String> root = (Node<String>) TestUtil.getInstanceField(dict, "root");
             assertTheNode(root, null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new String[]{"0.0.0.0"});
             Node<String> node = root.getRefToChildren().get(dict.convertIPStringToBinary("0.0.0.0"));
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, 17, new String[]{"255.255.128"});
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 17, new String[]{"255.255.128.0"});
             node = node.getRefToChildren().get(dict.convertIPStringToBinary("255.255.128.0"));
             assertTheNode(node, "Data of 255.255.128.0/17", 17, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }

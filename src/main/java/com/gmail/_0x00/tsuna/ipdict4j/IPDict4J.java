@@ -1,5 +1,9 @@
 package com.gmail._0x00.tsuna.ipdict4j;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.InetAddressValidator;
+
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -16,6 +20,7 @@ public class IPDict4J <T>
     private static final Pattern IPV4_REGEX
             = Pattern.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
+    private static final InetAddressValidator VALIDATOR = new InetAddressValidator();
 
     private static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
 
@@ -43,10 +48,9 @@ public class IPDict4J <T>
      * @throws Exception
      */
     public IPDict4J push(String ip, int subnetMaskLength, T data) throws Exception {
-        if(!IPV4_REGEX.matcher(ip).matches())
-            throw new Exception("String of IPv4 " + ip + " is invalid");
+
         if(data == null)
-            throw new Exception("Cannot push null as data");  /* TODO: */
+            throw new IllegalArgumentException("Cannot push null as data");
 
         return pushDataToIPv4Tree(
                 root,
@@ -146,13 +150,37 @@ public class IPDict4J <T>
      * @param ip String of IPv4 address
      * @return IPv4 address converted 32bit int.
      */
+//    public int convertIPStringToBinary(String ip) {
+//        int binIPv4 = 0;
+//
+//        if(!VALIDATOR.isValidInet4Address(ip))
+//            throw new IllegalArgumentException("Format of IPv4 address \"" + ip + "\" is invalid.");
+//
+//        String[] ipv4Str = ip.split(IPV4_DELEMITOR);
+//        for(int i = 0; i < ipv4Str.length; ++i) {
+//            binIPv4 += (Integer.parseInt(ipv4Str[i]) << ((3 - i) * 8));
+//        }
+//        return binIPv4;
+//    }
+
     public int convertIPStringToBinary(String ip) {
         int binIPv4 = 0;
-
+        int octet;
         String[] ipv4Str = ip.split(IPV4_DELEMITOR);
 
-        for(int i = 0; i < ipv4Str.length; ++i) {
-            binIPv4 += (Integer.parseInt(ipv4Str[i]) << ((3 - i) * 8));
+        if(ipv4Str.length != 4)
+            throw new IllegalArgumentException("Format of IPv4 address \"" + ip + "\" is illegal");
+
+        try {
+            for(int i = 0; i < ipv4Str.length; ++i) {
+                 octet = Integer.parseInt(ipv4Str[i]);
+                 if(octet > 255 || octet < 0)
+                     throw new IllegalArgumentException("Format of IPv4 address \"" + ip + "\" is illegal");
+
+                 binIPv4 += (octet << ((3 - i) * 8));
+            }
+        } catch(NumberFormatException e) {
+            throw new IllegalArgumentException("Format of IPv4 address \"" + ip + "\" is illegal");
         }
 
         return binIPv4;
