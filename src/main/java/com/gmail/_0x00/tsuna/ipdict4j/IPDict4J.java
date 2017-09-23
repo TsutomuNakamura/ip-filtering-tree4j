@@ -140,19 +140,6 @@ public class IPDict4J <T>
      * @param ip String of IPv4 address
      * @return IPv4 address converted 32bit int.
      */
-//    public int convertIPStringToBinary(String ip) {
-//        int binIPv4 = 0;
-//
-//        if(!VALIDATOR.isValidInet4Address(ip))
-//            throw new IllegalArgumentException("Format of IPv4 address \"" + ip + "\" is invalid.");
-//
-//        String[] ipv4Str = ip.split(IPV4_DELEMITOR);
-//        for(int i = 0; i < ipv4Str.length; ++i) {
-//            binIPv4 += (Integer.parseInt(ipv4Str[i]) << ((3 - i) * 8));
-//        }
-//        return binIPv4;
-//    }
-
     public int convertIPStringToBinary(String ip) {
         int binIPv4 = 0;
         int octet;
