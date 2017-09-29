@@ -1,4 +1,4 @@
-package com.gmail._0x00.tsuna.ipdict4j;
+package com.gmail._0x00.tsuna.ipfilteringtree4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,7 @@ import java.util.Stack;
  * Hello world!
  *
  */
-public class IPDict4J <T>
+public class IPFilteringTree4J <T>
 {
     private static final String IPV4_DELEMITOR = "\\.";
 
@@ -18,7 +18,7 @@ public class IPDict4J <T>
 
     private int[] masks = new int[32 + 1];
 
-    public IPDict4J() {
+    public IPFilteringTree4J() {
         Map<Integer, Node<T>> rootMap = root.getRefToChildren();
         rootMap.put(0, new Node<>(null, 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
 
@@ -37,7 +37,7 @@ public class IPDict4J <T>
      * @return instance of IPDict4J
      * @throws Exception
      */
-    public IPDict4J push(String ip, int subnetMaskLength, T data) throws Exception {
+    public IPFilteringTree4J push(String ip, int subnetMaskLength, T data) throws Exception {
 
         if(data == null)
             throw new IllegalArgumentException("Cannot push null as data");
@@ -54,7 +54,7 @@ public class IPDict4J <T>
         return root.getRefToChildren().get(0);
     }
 
-    private IPDict4J<T> pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws Exception {
+    private IPFilteringTree4J<T> pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws Exception {
         Node<T> currentNode     = node;
         Node<T> parentNode      = pNode;
         int lastNetworkAddress  = 0;
@@ -309,20 +309,20 @@ public class IPDict4J <T>
 
     private void rebalanceChildGlueNode(Node<T> node, Node<T> parentNode, int keyToCurrentNode) {
         if(node.getChildSubnetMaskLength() == 32 ||
-                node.getChildSubnetMaskLength() == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED ||
+                node.getChildSubnetMaskLength() == IPFilteringTree4J.SUBNETMASK_LENGTH_IS_UNDEFINED ||
                 !hasGlueNodeOnly(node)) {
             return;
         }
 
         Map<Integer, Node<T>> oldChildNodes = node.getRefToChildren();
-        int len                         = IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED;
+        int len                         = IPFilteringTree4J.SUBNETMASK_LENGTH_IS_UNDEFINED;
         int minimum                     = 32;
         Map<Integer, Object> variance   = new HashMap<>();
         boolean doCreate                = false;
 
         for(Map.Entry<Integer, Node<T>> e : oldChildNodes.entrySet()) {
             len = e.getValue().getChildSubnetMaskLength();
-            if(len == IPDict4J.SUBNETMASK_LENGTH_IS_UNDEFINED) continue;
+            if(len == IPFilteringTree4J.SUBNETMASK_LENGTH_IS_UNDEFINED) continue;
             variance.put(len, null);
             if(minimum > len) minimum = len;
 

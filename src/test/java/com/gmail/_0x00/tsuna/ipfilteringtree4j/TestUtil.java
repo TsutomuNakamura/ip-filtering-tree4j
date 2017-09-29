@@ -1,4 +1,4 @@
-package com.gmail._0x00.tsuna.ipdict4j;
+package com.gmail._0x00.tsuna.ipfilteringtree4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

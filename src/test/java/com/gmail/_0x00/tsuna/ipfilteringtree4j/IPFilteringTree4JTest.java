@@ -1,4 +1,4 @@
-package com.gmail._0x00.tsuna.ipdict4j;
+package com.gmail._0x00.tsuna.ipfilteringtree4j;
 
 
 
@@ -9,15 +9,15 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.gmail._0x00.tsuna.ipdict4j.IPDict4J.Node;
+import static com.gmail._0x00.tsuna.ipfilteringtree4j.IPFilteringTree4J.Node;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test for IPDict4J.
  */
-public class IPDict4JTest
+public class IPFilteringTree4JTest
 {
-    private IPDict4J<String> dict;
+    private IPFilteringTree4J<String> dict;
     private int SUBNETMASK_LENGTH_IS_UNDEFINED;
 
     public <E> void assertTheNode(Node<String> node, java.lang.String data, int subnetMaskLength, int childSubnetMaskLength, String[] indexesOfChildNodes) {
@@ -34,8 +34,8 @@ public class IPDict4JTest
 
     @BeforeEach
     public void beforeEach() throws NoSuchFieldException, IllegalAccessException {
-        dict = new IPDict4J<>();
-        SUBNETMASK_LENGTH_IS_UNDEFINED = (int)TestUtil.getStaticField(IPDict4J.class, "SUBNETMASK_LENGTH_IS_UNDEFINED");
+        dict = new IPFilteringTree4J<>();
+        SUBNETMASK_LENGTH_IS_UNDEFINED = (int)TestUtil.getStaticField(IPFilteringTree4J.class, "SUBNETMASK_LENGTH_IS_UNDEFINED");
     }
 
     /**
@@ -146,7 +146,7 @@ public class IPDict4JTest
         void beforeEach() throws NoSuchMethodException {
             n = new Node<String>("Data of 0.0.0.0/0", 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>());
             m = new HashMap<Integer, Node<String>>();
-            method = TestUtil.getMethod(IPDict4J.class, "hasGlueNodeOnly", new Class[]{Node.class});
+            method = TestUtil.getMethod(IPFilteringTree4J.class, "hasGlueNodeOnly", new Class[]{Node.class});
         }
 
         @Test @DisplayName("should return false if only one data node is existed")
@@ -267,7 +267,7 @@ public class IPDict4JTest
         Method method;
         @BeforeEach
         void beforeEach() throws Exception {
-            method = TestUtil.getMethod(IPDict4J.class, "createGlueNodes", new Class[]{Node.class, Node.class, int.class, int.class});
+            method = TestUtil.getMethod(IPFilteringTree4J.class, "createGlueNodes", new Class[]{Node.class, Node.class, int.class, int.class});
         }
         @Test @DisplayName("should create a single glue node under the middle of data node")
         void createGluenodes_075a1add_3ef1_4149_a245_728c0813f9f4() throws Exception {
@@ -430,7 +430,7 @@ public class IPDict4JTest
                 | 192.168.128.0/24(d)     | | 192.168.0.0/24(d)       |
                 +-------------------------+ +-------------------------+
             */
-            dict = new IPDict4J<>();
+            dict = new IPFilteringTree4J<>();
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
@@ -760,7 +760,7 @@ public class IPDict4JTest
                 | 1)255.255.255.255/32(d) | | 2)255.255.255.254/32(d) |
                 +-------------------------+ +-------------------------+
             */
-            dict = new IPDict4J<>();
+            dict = new IPFilteringTree4J<>();
             dict.push("255.255.255.255", 32, "Data of 255.255.255.255/32");
             dict.push("255.255.255.254", 32, "Data of 255.255.255.254/32");
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
@@ -1072,7 +1072,7 @@ public class IPDict4JTest
             assertTheNode(node1, "Data of 172.16.0.0/16", 16, SUBNETMASK_LENGTH_IS_UNDEFINED, new String[]{});
         }
 
-        void assertSetType3(IPDict4J<String> dict) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        void assertSetType3(IPFilteringTree4J<String> dict) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 16, new String[]{"192.168.0.0", "192.169.0.0", "172.16.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("172.16.0.0"));
@@ -1132,7 +1132,7 @@ public class IPDict4JTest
             assertSetType3(dict);
         }
 
-        void assertSetType5(IPDict4J<String> dict) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        void assertSetType5(IPFilteringTree4J<String> dict) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
             Node<String> node = (Node<String>) TestUtil.invokeInstanceMethod(dict, "getRootNode", new Class[]{}, null);
             assertTheNode(node, null, 0, 8, new String[]{"192.0.0.0", "172.0.0.0", "10.0.0.0"});
             Node<String> node1 = node.getRefToChildren().get(dict.convertIPStringToBinary("192.0.0.0"));
@@ -1461,7 +1461,7 @@ public class IPDict4JTest
         Method method = null;
         @BeforeEach
         void beforeEach() throws NoSuchMethodException {
-            method = TestUtil.getMethod(IPDict4J.class, "rebalanceChildGlueNode", new Class[]{Node.class, Node.class, int.class});
+            method = TestUtil.getMethod(IPFilteringTree4J.class, "rebalanceChildGlueNode", new Class[]{Node.class, Node.class, int.class});
         }
 
         @Test @DisplayName("should do nothing if the node has no child nodes")
