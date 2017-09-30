@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gmail._0x00.tsuna.ipfilteringtree4</groupId>
-  <artifactId>ipfilteringtree4j</artifactId>
+  <artifactId>ip-filtering-tree4j</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>ipfilteringtree4j</name>
+  <version>1.0.0</version>
+  <name>ip-filtering-tree4j</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
