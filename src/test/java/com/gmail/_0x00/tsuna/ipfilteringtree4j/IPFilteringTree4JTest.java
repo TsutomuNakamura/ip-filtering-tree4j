@@ -1,7 +1,5 @@
 package com.gmail._0x00.tsuna.ipfilteringtree4j;
 
-
-
 import org.junit.jupiter.api.*;
 
 import java.lang.reflect.InvocationTargetException;

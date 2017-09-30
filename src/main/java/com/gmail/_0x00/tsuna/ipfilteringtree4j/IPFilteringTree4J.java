@@ -4,25 +4,84 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+/**
+ * IPFilteringTree4j is a key value on memory database mapped by IPv4 address.
+ * It can push various types of values by using IPv4 address and its subnet mask length.
+ * And it search the data with Longest prefix match(also called Maximum prefix length match) rules by using tree algorithms.
+ * Due to the algorithm, if you want to push data as a default, you can push data with key 0.0.0.0/0.<br><br>
+ *
+ * Quick examples ofousages are like below.<br><br>
+ *
+ * <h2>instantiate:</h2>
+ * <pre>
+ * {@code
+ * IPFilteringTree4J db = new IPFilteringTree4J();
+ * }
+ * </pre>
+ *
+ * <h2>push:</h2>
+ * <pre>
+ * {@code
+ * db.push("");
+ * // push(<ipaddr>, <subnet mask length>, <data>);
+ * db.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+ * db.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+ * db.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+ * db.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+ * }
+ * </pre>
+ *
+ * <h2>find:</h2>
+ * <pre>
+ * {@code
+ * db.find("192.168.1.0");    // -> Data of 192.168.1.0/24
+ * db.find("192.168.2.100");    // -> Data of 192.168.2.0/24
+ * db.find("192.168.101.32");    // -> Data of 192.168.0.0/16
+ * db.find("10.1.0.23");    // -> Data of 0.0.0.0/0
+ * }
+ * </pre>
+ *
+ * <h2>delete:</h2>
+ * <pre>
+ * {@code
+ * db.delete("192.168.1.0", 24);    // -> Data of 192.168.1.0/24
+ * db.find("192.168.1.0");  // -> data of 192.168.0.0/16
+ * db.delete("192.168.0.0", 16);    // -> Data of 192.168.0.0/16
+ * db.find("192.168.1.0");  // -> Data of 0.0.0.0/0
+ * }
+ * </pre>
+ *
+ * @param <T> the type of valued mapped by IPv4 address
+ * @author Tsutomu Nakamura
+ * @since 1.8+
+ */
 public class IPFilteringTree4J <T>
 {
+    /** Delemiter of IPv4 */
     private static final String IPV4_DELEMITOR = "\\.";
 
+    /** Constant which means subnetmask length is unregistered */
     private static final int SUBNETMASK_LENGTH_IS_UNDEFINED = -1;
 
+    /** Root node of the tree */
     private Node<T> root = new Node<>(null, SUBNETMASK_LENGTH_IS_UNDEFINED, 0, new HashMap<>());
 
-    private int[] masks = new int[32 + 1];
+    /** List of subnet mask length of IPv4 */
+    private static int[] masks;
 
-    public IPFilteringTree4J() {
-        Map<Integer, Node<T>> rootMap = root.getRefToChildren();
-        rootMap.put(0, new Node<>(null, 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
-
+    static {
+        masks = new int[32 + 1];
         int mask = 0xffffffff;
         for(int i = 32; i >= 0; --i) {
             masks[i] = mask;
             mask <<= 1;
         }
+    };
+
+    /** Constructs a new empty ip-filtering-tree. */
+    public IPFilteringTree4J() {
+        Map<Integer, Node<T>> rootMap = root.getRefToChildren();
+        rootMap.put(0, new Node<>(null, 0, SUBNETMASK_LENGTH_IS_UNDEFINED, new HashMap<>()));
     }
 
     /**
@@ -31,7 +90,7 @@ public class IPFilteringTree4J <T>
      * @param subnetMaskLength Length of network address for IPv4 address
      * @param data Data
      * @return instance of IPFilteringTree4J
-     * @throws Exception
+     * @throws IllegalArgumentException if data was null or wrong IPv4 address format
      */
     public IPFilteringTree4J push(String ip, int subnetMaskLength, T data) throws IllegalArgumentException {
 
@@ -211,6 +270,7 @@ public class IPFilteringTree4J <T>
      * Remove a data in the tree indexed by IPv4 network address.
      * @param ip IPv4 address string for index.
      * @param maskLen Length of network address for IPv4 address.
+     * @return data that has deleted.
      */
     public T delete(String ip, int maskLen) {
         return deleteDataFromTheTree(getRootNode(), root, convertIPStringToBinary(ip), maskLen);
@@ -222,6 +282,7 @@ public class IPFilteringTree4J <T>
      * @param parentNode parent node of target node
      * @param ip ip address to the node
      * @param maskLen subnet mask length to the node that will be deleted
+     * @return data that has deleted
      */
     private T deleteDataFromTheTree(Node<T> node, Node<T> parentNode, final int ip, final int maskLen) {
         Node<T> currentNode = node;
