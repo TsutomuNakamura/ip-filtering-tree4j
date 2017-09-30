@@ -13,7 +13,7 @@ import static com.gmail._0x00.tsuna.ipfilteringtree4j.IPFilteringTree4J.Node;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit test for IPDict4J.
+ * Unit test for IPFilteringTree4J.
  */
 public class IPFilteringTree4JTest
 {

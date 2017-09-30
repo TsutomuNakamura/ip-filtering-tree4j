@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-/**
- * Hello world!
- *
- */
 public class IPFilteringTree4J <T>
 {
     private static final String IPV4_DELEMITOR = "\\.";
@@ -34,13 +30,13 @@ public class IPFilteringTree4J <T>
      * @param ip IPv4 address string for index
      * @param subnetMaskLength Length of network address for IPv4 address
      * @param data Data
-     * @return instance of IPDict4J
+     * @return instance of IPFilteringTree4J
      * @throws Exception
      */
-    public IPFilteringTree4J push(String ip, int subnetMaskLength, T data) throws Exception {
+    public IPFilteringTree4J push(String ip, int subnetMaskLength, T data) throws IllegalArgumentException {
 
         if(data == null)
-            throw new IllegalArgumentException("Cannot push null as data");
+            throw new IllegalArgumentException("Cannot push null as data (" + ip + "/" + subnetMaskLength + ", null)");
 
         return pushDataToIPv4Tree(
                 root,
@@ -54,7 +50,7 @@ public class IPFilteringTree4J <T>
         return root.getRefToChildren().get(0);
     }
 
-    private IPFilteringTree4J<T> pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws Exception {
+    private IPFilteringTree4J<T> pushDataToIPv4Tree(Node<T> node, Node<T> pNode, int ipv4, int subnetMaskLength, T data) throws IllegalArgumentException {
         Node<T> currentNode     = node;
         Node<T> parentNode      = pNode;
         int lastNetworkAddress  = 0;
@@ -65,8 +61,8 @@ public class IPFilteringTree4J <T>
             if(subnetLengthOfCurrentNode == subnetMaskLength) {
                 // The data may have been existed
                 if(currentNode.getData() != null) {
-                    // TODO: appropriate exception
-                    throw new Exception("The data you are going to is already registerd at index ...");
+                    throw new IllegalArgumentException(
+                            "The data you are going to push is already registered with same IP index (" + stringifyFromBinIPv4(ipv4) + "/" + subnetMaskLength + ").");
                 }
                 // Override the data in this glue node
                 parentNode.getRefToChildren().put(
@@ -101,7 +97,7 @@ public class IPFilteringTree4J <T>
                 if(currentNode.getChildSubnetMaskLength() > subnetMaskLength) {
                     // Create glue node then check the glue node's network address
                     // If data node was already existed, createGlueNodes does nothing then continues then throws error.
-                    createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength); /* FIXME: */
+                    createGlueNodes(currentNode, parentNode, lastNetworkAddress, subnetMaskLength);
                     currentNode = parentNode.getRefToChildren().get(lastNetworkAddress);
                 } else if(currentNode.getChildSubnetMaskLength() < subnetMaskLength) {
                     // continue then new node will be appended
@@ -128,7 +124,7 @@ public class IPFilteringTree4J <T>
                 }
             } else {
                 // unreachable
-                throw new Exception("Push instruction has gone wrong exception.");
+                throw new Error("Oops... Push instruction has gone something wrong (" + stringifyFromBinIPv4(ipv4) + "/" + subnetMaskLength + ").");
             }
         }
 
