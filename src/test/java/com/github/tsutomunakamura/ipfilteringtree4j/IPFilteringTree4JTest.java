@@ -1,4 +1,4 @@
-package com.gmail.tsuna0x00.ipfilteringtree4j;
+package com.github.tsutomunakamura.ipfilteringtree4j;
 
 import org.junit.jupiter.api.*;
 
@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.gmail.tsuna0x00.ipfilteringtree4j.IPFilteringTree4J.Node;
+import static com.github.tsutomunakamura.ipfilteringtree4j.IPFilteringTree4J.Node;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
