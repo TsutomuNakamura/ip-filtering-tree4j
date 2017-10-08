@@ -12,7 +12,7 @@
 
   <groupId>com.github.tsutomunakamura.ipfilteringtree4j</groupId>
   <artifactId>ip-filtering-tree4j</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -44,66 +44,45 @@
       http://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html
       https://www.petrikainulainen.net/programming/testing/junit-5-tutorial-running-unit-tests-with-maven/
     -->
-    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-surefire-plugin</artifactId>
       <version>2.20.1</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.0.0</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
+
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
       <version>4.12.0</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher -->
+
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
       <version>1.0.0</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-runner -->
+
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-runner</artifactId>
       <version>1.0.0</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-compiler-plugin</artifactId>
       <version>3.7.0</version>
     </dependency>
-
-    <!-- TODO: test -->
-    <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator/1.6 -->
-    <!--
-    <dependency>
-      <groupId>commons-validator</groupId>
-      <artifactId>commons-validator</artifactId>
-      <version>1.6</version>
-    </dependency>
-    -->
-
-    <!-- TODO: test -->
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3/3.6 -->
-    <!--
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.6</version>
-    </dependency>
-    -->
 
   </dependencies>
   <build>
@@ -129,18 +108,19 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.20</version>
         <dependencies>
-          <!-- https://mvnrepository.com/artifact/org.junit.platform/junit-platform-surefire-provider -->
+
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
             <version>1.0.0-RC3</version>
           </dependency>
-            <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.0.0-RC3</version>
           </dependency>
+
         </dependencies>
         <configuration>
           <includes>
@@ -149,7 +129,6 @@
         </configuration>
       </plugin>
 
-      <!-- https://mvnrepository.com/artifact/org.sonatype.plugins/nexus-staging-maven-plugin -->
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
