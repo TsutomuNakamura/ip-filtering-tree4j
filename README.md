@@ -7,9 +7,6 @@ It is an another version of the [ip-filtering-tree](https://github.com/TsutomuNa
 # Getting started
 This program requires Java 8 or greater and mvn, so please install it your environment first.
 
-## Use maven central repository
-TODO: 
-
 ## Building in your local
 If you can not download it from maven centrarl repository, you can build it with clone this repository and run mvn command.
 
@@ -19,6 +16,24 @@ $ cd ip-filtering-tree4j
 $ export JAVA_HOME=$(readlink -f $(which java))
 $ mvn package
 -> *.jar file will be created in ./target/ip-filtering-tree4j-x.x.x.jar
+```
+
+## Use maven central repository
+* ~/.m2/settings.xml
+```
+<settings>
+  <servers>
+    <server>
+      <id>ossrh</id>
+      <username>your-sonatype-username</username>
+      <password>your-sonatype-password</password>
+    </server>
+  </servers>
+</settings>
+```
+
+```
+$ mvn clean deploy
 ```
 
 ## Usage
