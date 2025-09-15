@@ -16,6 +16,7 @@ If you can not download it from maven centrarl repository, you can build it with
 ```
 $ git clone https://github.com/TsutomuNakamura/ip-filtering-tree4j.git
 $ cd ip-filtering-tree4j
+$ export JAVA_HOME=$(readlink -f $(which java))
 $ mvn package
 -> *.jar file will be created in ./target/ip-filtering-tree4j-x.x.x.jar
 ```
