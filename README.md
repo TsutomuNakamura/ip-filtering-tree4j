@@ -21,6 +21,28 @@ $ mvn package
 ```
 
 ## Use maven central repository
+You should create your GOG key first if you do not have it yet.
+Then upload it to a public key server like `keyserver.ubuntu.com`.
+
+* Generate your GPG key
+```
+$ gpg --gen-key
+> # Follow the instructions
+$ gpg --list-keys
+$ gpg --list-secret-keys
+[keyboxd]
+---------
+sec   ed25519 YYYY-MM-DD [SC] [expires: YYYY-MM-DD]
+      01234567890ABCDEF1234567890ABCDEF1234567
+uid           [ultimate] Name of the key <your-email@example.com>
+ssb   cv25519 YYYY-MM-DD [E] [expires: YYYY-MM-DD]
+
+$ gpg --keyserver keyserver.ubuntu.com --send-keys 01234567890ABCDEF1234567890ABCDEF1234567
+```
+
+Next, create your user token from [https://central.sonatype.com/](https://central.sonatype.com/).
+Then set your sonatype username, password and GPG keys in `~/.m2/settings.xml` file like below.
+
 * ~/.m2/settings.xml
 ```
 <settings>
@@ -31,8 +53,24 @@ $ mvn package
       <password>your-sonatype-password</password>
     </server>
   </servers>
+
+  <profiles>
+    <profile>
+      <id>gpg</id>
+      <properties>
+        <gpg.executable>gpg</gpg.executable>
+        <gpg.passphrase>your-gpg-passphrase</gpg.passphrase>
+      </properties>
+    </profile>
+  </profiles>
+  
+  <activeProfiles>
+    <activeProfile>gpg</activeProfile>
+  </activeProfiles>
 </settings>
 ```
+
+Then deploy this module to maven central repository with `mvn deploy`.
 
 ```
 $ mvn clean deploy
